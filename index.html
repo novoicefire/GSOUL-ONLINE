@@ -407,9 +407,9 @@
             <h2>選擇路線</h2>
             <div id="route-list">
                 <div class="route-item"><input type="checkbox" id="route-handicraft_culture" onchange="toggleRoute('handicraft_culture')"><label for="route-handicraft_culture">手作文化路線</label></div>
-                <div class="route-item"><input type="checkbox" id="route-natural_culture" disabled><label for="route-natural_culture">自然文化路線 (未開放)</label></div>
-                <div class="route-item"><input type="checkbox" id="route-farm_food_sustainability" disabled><label for="route-farm_food_sustainability">農食永續路線 (未開放)</label></div>
-                <div class="route-item"><input type="checkbox" id="route-indigenous_culture" disabled><label for="route-indigenous_culture">原住民文化路線 (未開放)</label></div>
+                <div class="route-item"><input type="checkbox" id="route-natural_culture" onchange="toggleRoute('natural_culture')"><label for="route-natural_culture">自然文化路線</label></div>
+                <div class="route-item"><input type="checkbox" id="route-farm_food_sustainability" onchange="toggleRoute('farm_food_sustainability')"><label for="route-farm_food_sustainability">農食永續路線</label></div>
+                <div class="route-item"><input type="checkbox" id="route-indigenous_culture" onchange="toggleRoute('indigenous_culture')"><label for="route-indigenous_culture">原住民文化路線</label></div>
             </div>
         </div>
     </div>
@@ -555,60 +555,21 @@
     </div>
     <!-- ▲▲▲ 新增結束 ▲▲▲ -->
     <script>
-        // --- 全局通知函式 ---
-        function showNotification(message, title = "提示") {
-            //設定通知視窗的標題和內容
-            document.getElementById('notification-title').innerText = title;
-            document.getElementById('notification-message').innerText = message;
-            
-            // 為「好的」按鈕綁定關閉事件
-            document.getElementById('notification-close-btn').onclick = () => {
-                toggleModal('notification-modal');
-            };
-
-            // 顯示通知視窗
-            toggleModal('notification-modal');
-        }
-        // --- 遊戲資料 (加入 taskType 和 taskData) ---
-        const locations = {
-            'handicraft_culture': [
-                { id: 'cijing', name: '清境農場周邊部落', lat: 24.03419878283817, lng: 121.16023317696795, desc: '位於南投仁愛鄉，是賽德克族的重要聚居地。除了知名的清境農場，周邊的部落如博望新村、春陽部落保留了豐富的賽德克文化與歷史軌跡。', task: '打卡任務: 在部落入口的特色牌樓或圖騰前拍照，上傳照片以完成任務。', isPlayable: true, isCompleted: false, imageUrl: 'https://syatour.blog/wp-content/uploads/xuite/18804fe/5078229/1182473001_o.jpg', taskType: 'photo' },
-                { id: 'wushe', name: '霧社事件紀念公園', lat: 24.020534565829664, lng: 121.13260097280227, desc: '為紀念1930年霧社事件而建，是台灣原住民反抗日本殖民統治最重要的歷史地標，園區內有莫那魯道紀念碑、抗日群像等。', task: '歷史問答：霧社事件發生於西元幾年？', isPlayable: true, isCompleted: false, imageUrl: 'https://tcmbdata.culture.tw/api/collection/image/Culture_Place?uid=618664', taskType: 'quiz', taskData: { question: '霧社事件發生於西元幾年？', options: ['1920', '1930', '1945'], answer: '1930' } },
-                { id: 'lushan', name: '廬山溫泉部落', lat: 24.02384430840503, lng: 121.1889637317114, desc: '此地為霧社事件領導者莫那魯道的故鄉——馬赫坡社(Mahebo)舊址。雖然現今溫泉業已不如以往，但其歷史連結性與周邊的吊橋、溪谷景觀，使其成為一個充滿故事性的地點。', task: '尋寶任務: 設計成「尋寶任務」，要求玩家在特定範圍內(如廬山吊橋)尋找特定文化符號，目的是鼓勵玩家探索整個區域，發掘隱藏在細節中的歷史痕跡。', isPlayable: true, isCompleted: false, imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/2/20/%E5%8F%B0%E7%81%A3%E5%BB%AC%E5%B1%B1.JPG', taskType: 'photo' },
-                { id: 'qubing', name: '曲冰遺址', lat: 23.95623368517869, lng: 121.07988497109066, desc: '位於仁愛鄉萬豐村，是台灣首次發現、面積最大的高山史前聚落遺址，以布農族的石板屋結構為特色，是了解台灣史前文化的重要窗口。', task: '扮演「考古學家」的角色，讓玩家根據照片尋找特定的建築細節，這種任務設計能引導他們從宏觀的石堆中，學會欣賞史前人類的建築智慧與工藝。', isPlayable: true, isCompleted: false, imageUrl: 'https://museum.sinica.edu.tw/_upload/custom/38159c0bcee90897.jpg', taskType: 'photo' },
-                { id: 'wujie', name: '武界部落', lat: 23.915792484586145, lng: 121.04424996441752, desc: '有「雲的故鄉」美名，是布農族卓社群的所在地。此地以武界壩的湖光山色、壯觀的雲海和一線天峽谷聞名，是結合自然美景與人文深度的秘境。', task: '在地消費: 購買石板烤肉的任務，能直接促進當地觀光消費，讓遊戲為部落帶來實質的經濟效益。', isPlayable: true, isCompleted: false, imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/1/14/Wujie_Overlook.jpg', taskType: 'verification', verificationCode: 'CLOUDS' },
-                { id: 'qinai', name: '親愛部落', lat: 23.968495162619167, lng: 121.10831602195961, desc: '以培育原住民孩子的「親愛愛樂」弦樂團而聞名全國。這個賽德克部落成功地將古典音樂與自身文化結合，創造了感動人心的故事。', task: '問答題：創辦「親愛愛樂」的老師是哪兩位？', isPlayable: true, isCompleted: false, imageUrl: 'https://explorethesun.tw/upload/files/%E6%97%85%E9%81%8A%E7%AF%87/%E5%B0%8F%E6%8F%90%E7%90%B4%E9%9F%B3%E6%A8%82%E6%9D%91-%E8%A6%AA%E6%84%9B%E6%9D%91/%E4%B8%AD_%E5%B0%8F%E6%8F%90%E7%90%B4%E9%9F%B3%E6%A8%82%E6%9D%91_%E8%A6%AA%E6%84%9B%E6%9D%91%20(1).jpg', taskType: 'quiz', taskData: { question: '創辦「親愛愛樂」的老師是哪兩位？', options: ['陳 heut及王子建', '張永青及陳佩文', '葉姿蘭及洪濬哲'], answer: '陳 heut及王子建' } },
-                { id: 'atayal_village', name: '泰雅渡假村', lat: 24.068377699985952, lng: 120.94328680905087, desc: '位於國姓鄉，是一個整合泰雅文化、自然生態與休閒娛樂的主題園區。這裡有定期的文化表演和DIY活動，是體驗泰雅文化的絕佳場所。', task: 'DIY挑戰: 設計「文化體驗」與「DIY挑戰」任務，讓玩家從「觀賞者」變成「參與者」，透過親身模仿與動手製作，加深對泰雅文化的理解與記憶。', isPlayable: true, isCompleted: false, imageUrl: 'https://www.atayal.com.tw/themes/zh-tw/assets/images/welcome_01.jpg', taskType: 'photo' },
-                { id: 'zhongyuan', name: '瑞岩部落', lat: 24.124615797864564, lng: 121.15866054786022, desc: '位於仁愛鄉發祥村，被認為是泰雅族的發源聖地之一，擁有深厚的部落歷史與傳統。部落內的瑞岩溫泉也是一大特色。', task: '尋根之旅: 設計「尋根之旅」的任務，引導玩家去尋找並閱讀記載起源故事的解說牌，能強化此地的歷史意義，並讓玩家在遊戲過程中感受到文化的傳承。', isPlayable: true, isCompleted: false, imageUrl: 'https://storage.googleapis.com/stateless-ourtrails/2020/01/f709883d-pic-ruiyan-25.jpg', taskType: 'photo' },
-                { id: 'craft_center', name: '國立臺灣工藝研究發展中心', lat: 23.980583448616933, lng: 120.69095993390164, desc: '台灣工藝推廣核心，含木藝、漆藝、竹藝、金工、玻璃等展示與體驗，並有旅物・SHOP販售原創設計工藝品。', task: '「五材大對決」: 參觀展館後，參與指定體驗(如木工拼圖)，並回答材質應用的小測驗，即可解鎖五材徽章。', isPlayable: true, isCompleted: false, imageUrl: 'https://tcdbdata.ntcri.gov.tw/upload/image/2022-07-20/a4780e76-19aa-483c-b373-f93f66820a40/%E8%87%BA%E7%81%A3%E5%B7%A5%E8%97%9D%E6%96%87%E5%8C%96%E5%9C%92%E5%8D%80.jpg', taskType: 'quiz', taskData: { question: '請問以下何者不是台灣常見的工藝材質？', options: ['竹', '木', '鑽石'], answer: '鑽石' } },
-                { id: 'meiyan_lacquer', name: '美研漆藝工坊', lat: 23.982984160435933, lng: 120.68463040112887, desc: '位於草屯鎮的傳統漆器工坊，專精蒔繪、脫胎、螺鈿等漆藝工法。', task: '「蒔繪體驗任務」: 參與「漆藝鑰匙圈」或「螺鈿小盤」DIY，需在製作中辨認工具名稱並上傳「完成品照+簽名標籤」至APP。', isPlayable: true, isCompleted: false, imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTYg3gk99T8q6Q-pDWqFdObkSLkTOtjtIKu5w&s', taskType: 'photo' },
-                { id: 'snake_kiln', name: '水里蛇窯陶藝文化園區', lat: 23.80112653111175, lng: 120.8648316079422, desc: '台灣現存最古老的柴燒蛇窯之一，提供陶藝體驗與導覽，是體驗陶土藝術的絕佳地點。', task: '「拉胚挑戰賽」: 玩家參與拉胚/手捏陶體驗課程，完成後輸入體驗編號並拍下「創作品與窯前合照」，即可解鎖柴燒之魂獎章。', isPlayable: true, isCompleted: false, imageUrl: 'https://travel.nantou.gov.tw/wp-content/uploads/google_map_photos/46904/2.jpg?1634689126', taskType: 'verification', verificationCode: 'KILN888' },
-                { id: 'guangxing_paper', name: '廣興紙寮', lat: 23.976264173308405 , lng: 120.93869882467996, desc: '位於埔里，保留傳統抄紙技術，兼具環保理念與觀光造紙體驗的工廠。', task: '「紙印探險家」: 體驗傳統抄紙後，用自己製作的紙拓印APP提供的「在地工藝印章」，拓印圖像上傳後完成任務。', isPlayable: true, isCompleted: false, imageUrl: 'https://travel.nantou.gov.tw/wp-content/uploads/google_map_photos/47243/1.jpg?1634689153', taskType: 'photo' },
-                { id: 'xuyuming_lacquer', name: '龍南天然漆博物館', lat: 23.968016215413463, lng: 120.9657471001591, desc: '位於埔里的資深漆藝師傅工藝之家，專注於蒔繪、脫胎漆器。', task: '「金粉蒔繪術」: 選擇製作「小漆盒」或「漆畫鑰匙牌」，APP中會出現互動教學動畫，完成後回傳照片與一段自我命名的「作品標題」。', isPlayable: true, isCompleted: false, imageUrl: 'https://itscindy.home.blog/wp-content/uploads/2021/03/dsc_0467.jpg', taskType: 'photo' },
-                { id: 'yuantai_bamboo', name: '元泰竹藝社', lat: 23.753835649298782, lng: 120.68333689093261, desc: '位於竹山鎮的在地竹藝品牌，專注於手工竹編、家飾與生活用品製作。', task: '「竹紋解碼任務」: 完成簡易竹編體驗(如杯墊、筆筒)後，需觀察作品上的編織紋樣，輸入指定紋路名稱解鎖任務。', isPlayable: true, isCompleted: false, imageUrl: 'https://event.cw.com.tw/smiletaiwan/42th/group5/tai02.jpg', taskType: 'verification', verificationCode: 'BAMBOO' },
-                { id: 'liuligong', name: '芳仕璐昂琉璃藝術館', lat: 23.76060806729584, lng: 120.67883015623268, desc: '位於竹山鎮，將琉璃玻璃藝術與繪畫技法結合，具現代與工藝融合特色。', task: '「玻璃拼畫師」: 參加玻璃彩繪DIY課程，完成後掃描體驗作品上的QR碼，解鎖藝術家故事與色彩心理測驗。', isPlayable: true, isCompleted: false, imageUrl: 'https://www.fs-glass.com.tw/pic/2296/photo/60407MWVhMzdh.png', taskType: 'verification', verificationCode: 'GLASSART' },
-                { id: 'hyaku_yama', name: 'hyaku yama ° 古道具店', lat: 23.96741498303542, lng: 120.68263883959376, desc: '位於竹山鎮，是結合古道具、工藝與茶文化的複合式展售空間。', task: '「舊物再生任務」: 店內提供「舊道具微改造體驗」，如重新布置茶具架、藍染布包裝小物，完成後上傳改造前後的對比照。', isPlayable: true, isCompleted: false, imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQan7Ti1iMKKJL8jTHoydCa_3SzSoI9DjPJYQ&s', taskType: 'photo' },
-                { id: 'akun_lemongrass', name: '阿坤香茅工坊', lat: 24.061336042336155, lng: 120.8923211387586, desc: '位於國姓鄉，由香茅農場轉型成的工坊，製作香茅皂、擴香等天然香草產品。', task: '「香草小配方」: 體驗「香茅防蚊膏」、「天然手工皂」或「香氛擴香石」DIY，玩家需選出合適材料並簡述「我的香味主題」。', isPlayable: true, isCompleted: false, imageUrl: 'https://scontent.frmq2-1.fna.fbcdn.net/v/t39.30808-6/480793754_3531064083868179_4736602933442005002_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=127cfc&_nc_ohc=2ljpPfZsnp0Q7kNvwENg70x&_nc_oc=AdmaKOH4vjZH2cK5VYfzMQImVNvgOnVhi9IpgkrpqX6NEQ3beLjU3wWerYL8qdyNPlA&_nc_zt=23&_nc_ht=scontent.frmq2-1.fna&_nc_gid=YclC0kqw884UhrEFietNBg&oh=00_AfPMsgp4Xa3pJhV3OXDmYMDxBmuyLO0eOUfcZ2iW9aA-YQ&oe=685374A7', taskType: 'photo' },
-                { id: 'craft_market', name: '工藝市集(草屯工藝中心旁)', lat: 23.98067259643174, lng: 120.69110079853942, desc: '不定期於草屯工藝中心舉辦，匯集全台工藝師與青年品牌的創意商品展售。', task: '「雙項工藝王」: 活動期間參與兩項DIY手作(如木刻鑰匙圈+草染手帕)，完成後自選1項作品上傳到APP並分享創作靈感獲得獎勵。', isPlayable: true, isCompleted: false, imageUrl: 'https://img.jatraveling.tw/2023/10/20231011204156_17.jpg', taskType: 'photo' },
-            ],
-            'natural_culture': [],
-            'farm_food_sustainability': [],
-            'indigenous_culture': []
-        };
-
-        // --- 遊戲狀態 ---
+        // --- 全局變數 ---
+        let locations = {};
         let map;
         let playerMarker;
-        let markerObjects = {}; 
+        let markerObjects = {};
         let playerState = {
             points: 0,
             completedTasks: 0,
             inventory: [],
             currentVerifyingLocation: null,
             name: '',
-            character: 'player_character.png' // 預設角色
+            character: 'player_character.png'
         };
-        
+        let activeRoutes = new Set();
+
         // --- 圖示定義 ---
         const defaultIcon = L.icon({
             iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
@@ -621,36 +582,83 @@
             iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
         });
 
-
         // --- 啟動與初始化邏輯 ---
         window.onload = function() {
             const splashScreen = document.getElementById('logo-splash');
-            let gameStarted = false; 
-
-            const launchGame = () => {
-                if (gameStarted) return;
-                gameStarted = true;
-                initializeLoginFlow();
-            };
-            
             setTimeout(() => {
                 splashScreen.classList.add('hidden');
             }, 2500);
-
-            splashScreen.addEventListener('transitionend', launchGame);
+            splashScreen.addEventListener('transitionend', initializeGameData);
         };
-        // --- ▼▼▼ 新增：登入與角色創建流程 ▼▼▼ ---
-        function initializeLoginFlow() {
-            // 1. 顯示登入視窗
-            toggleModal('login-modal');
 
-            // 2. 綁定 "Google登入" 按鈕事件
+        async function initializeGameData() {
+            try {
+                const response = await fetch('地點資料 - 工作表1.csv');
+                const csvText = await response.text();
+                const parsedData = parseCSV(csvText);
+
+                const allLocations = {};
+                parsedData.forEach(item => {
+                    const route = item.route;
+                    if (!allLocations[route]) {
+                        allLocations[route] = [];
+                    }
+                    const locationData = {
+                        id: item.id,
+                        name: item.name,
+                        lat: parseFloat(item.lat),
+                        lng: parseFloat(item.lng),
+                        desc: item.desc,
+                        task: item.task,
+                        isPlayable: false,
+                        isCompleted: false,
+                        imageUrl: item.imageUrl,
+                        taskType: item.taskType,
+                        verificationCode: item.verification_code || null
+                    };
+                    if (item.taskType === 'quiz') {
+                        locationData.taskData = {
+                            question: item.quiz_question,
+                            options: item.quiz_options.split('|'),
+                            answer: item.quiz_answer
+                        };
+                    }
+                    allLocations[route].push(locationData);
+                });
+                locations = allLocations;
+                initializeLoginFlow();
+            } catch (error) {
+                console.error("無法載入或解析CSV檔案:", error);
+                showNotification("遊戲資料載入失敗，請檢查檔案或網路連線。", "錯誤");
+            }
+        }
+
+        function parseCSV(text) {
+            const lines = text.trim().split(/\r\n|\n/);
+            const headers = lines[0].split(',').map(h => h.trim());
+            const rows = [];
+            for (let i = 1; i < lines.length; i++) {
+                if (lines[i].trim() === '') continue;
+                const values = lines[i].split(/,(?=(?:(?:[^\"]*\"){2})*[^\"]*$)/);
+                const obj = {};
+                for (let j = 0; j < headers.length; j++) {
+                    let value = values[j] || '';
+                    if (value.startsWith('"') && value.endsWith('"')) {
+                        value = value.slice(1, -1).replace(/""/g, '"');
+                    }
+                    obj[headers[j]] = value;
+                }
+                rows.push(obj);
+            }
+            return rows;
+        }
+
+        function initializeLoginFlow() {
+            toggleModal('login-modal');
             document.getElementById('google-login-btn').onclick = () => {
                 toggleModal('login-modal');
                 toggleModal('create-account-modal');
             };
-
-            // 3. 處理角色選擇
             const charOptions = document.querySelectorAll('.char-option');
             charOptions.forEach(option => {
                 option.onclick = () => {
@@ -659,8 +667,6 @@
                     playerState.character = option.getAttribute('data-char');
                 };
             });
-
-            // 4. 綁定 "確認創建" 按鈕事件
             document.getElementById('confirm-creation-btn').onclick = () => {
                 const playerName = document.getElementById('player-name-input').value.trim();
                 if (!playerName) {
@@ -671,21 +677,16 @@
                 toggleModal('create-account-modal');
                 toggleModal('location-permission-modal');
             };
-
-            // 5. 綁定 "允許定位" 按鈕事件
             document.getElementById('allow-location-btn').onclick = () => {
                 toggleModal('location-permission-modal');
-                // 定位請求成功後，才真正開始遊戲
                 startGame();
             };
         }
-        // --- ▲▲▲ 新增結束 ▲▲▲ ---
 
         function startGame() {
             initMap();
             updateProgressBar();
             updatePointsDisplay();
-            
             document.getElementById('theme-button').addEventListener('click', () => toggleModal('theme-modal'));
             document.getElementById('shop-btn').addEventListener('click', () => toggleModal('shop-modal'));
             document.getElementById('map-btn').addEventListener('click', () => {
@@ -696,36 +697,26 @@
         }
         
         function initMap() {
-            const initialPosition = [23.965055100439997, 120.96731992393025]; 
-
-            map = L.map('map', { 
-                zoomControl: false, 
-                attributionControl: false 
-            }).setView(initialPosition, 15);
-
+            const initialPosition = [23.965055100439997, 120.96731992393025];
+            map = L.map('map', { zoomControl: false, attributionControl: false }).setView(initialPosition, 15);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             }).addTo(map);
-
             const playerIcon = L.icon({
-                iconUrl: playerState.character, // 使用玩家選擇的角色
+                iconUrl: playerState.character,
                 iconSize: [50, 90],
-                className: 'player-marker-icon' 
+                className: 'player-marker-icon'
             });
-            
             playerMarker = L.marker(initialPosition, { icon: playerIcon }).addTo(map);
-
             if (navigator.geolocation) {
                 navigator.geolocation.watchPosition(
                     (position) => {
                         const newPos = [position.coords.latitude, position.coords.longitude];
-                        playerMarker.setLatLng(newPos); 
-                        map.panTo(newPos); 
-                        checkAndUnlockTasks('handicraft_culture');
+                        playerMarker.setLatLng(newPos);
+                        map.panTo(newPos);
+                        activeRoutes.forEach(route => checkAndUnlockTasks(route));
                     }, 
-                    () => {
-                        console.log("無法取得GPS，地靈將停留在起始點。");
-                    }, 
+                    () => console.log("無法取得GPS，地靈將停留在起始點。"), 
                     { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
                 );
             } else {
@@ -733,21 +724,15 @@
             }
         }
         
-        // --- 核心遊戲邏輯函式 ---
-
         function showLocationDetails(location) {
-            const locationImage = document.getElementById('location-image');
-            const navigateBtn = document.getElementById('navigate-btn');
             document.getElementById('location-title').innerText = location.name;
             document.getElementById('location-desc').innerText = location.desc;
-            locationImage.src = location.imageUrl;
-            const navUrl = `https://www.google.com/maps/dir/?api=1&destination=${location.lat},${location.lng}`;
-            navigateBtn.href = navUrl;
+            document.getElementById('location-image').src = location.imageUrl;
+            document.getElementById('navigate-btn').href = `https://www.google.com/maps/dir/?api=1&destination=${location.lat},${location.lng}`;
             
             const taskBtn = document.getElementById('accept-task-btn');
-            const taskLocation = locations.handicraft_culture.find(l => l.id === location.id);
-
-            if (taskLocation && taskLocation.isCompleted) {
+            
+            if (location.isCompleted) {
                  document.getElementById('location-task').innerText = "您已完成此地的任務！";
                  taskBtn.disabled = true;
                  taskBtn.innerText = "任務已完成";
@@ -755,8 +740,6 @@
                 document.getElementById('location-task').innerText = location.task;
                 taskBtn.disabled = false;
                 taskBtn.innerText = "開始任務";
-                
-                // 根據 taskType 決定點擊後要執行哪個函式
                 switch (location.taskType) {
                     case 'verification':
                         taskBtn.onclick = () => openVerificationModal(location);
@@ -768,7 +751,6 @@
                         taskBtn.onclick = () => openQuizModal(location);
                         break;
                     default:
-                        // 如果沒有指定類型，預設為直接完成 (作為後備)
                         taskBtn.onclick = () => completeTask(location);
                         break;
                 }
@@ -780,8 +762,6 @@
             toggleModal('location-modal');
         }
 
-        // --- 建立各種任務類型的處理函式 ---
-        // 驗證碼/QR Code 任務
         function openVerificationModal(location) {
             playerState.currentVerifyingLocation = location;
             document.getElementById('verification-task-name').innerText = `正在驗證：${location.name}`;
@@ -798,7 +778,6 @@
             const location = playerState.currentVerifyingLocation;
             const userInput = document.getElementById('verification-input').value.trim().toUpperCase();
             const correctCode = location.verificationCode.toUpperCase();
-
             if (userInput === correctCode) {
                 showNotification("驗證成功！任務完成！", "恭喜！");
                 toggleModal('verification-modal');
@@ -809,18 +788,15 @@
             }
         }
 
-        // 拍照上傳任務 
         function openPhotoUploadModal(location) {
             playerState.currentVerifyingLocation = location;
             const preview = document.getElementById('photo-preview');
             preview.innerHTML = '點擊按鈕模擬拍照';
             preview.style.backgroundImage = '';
             document.getElementById('upload-photo-btn').onclick = () => {
-                // 模擬拍照成功，顯示預覽圖
                 preview.innerHTML = '';
                 preview.style.backgroundImage = `url(${location.imageUrl})`;
                 preview.style.backgroundSize = 'cover';
-                // 模擬上傳成功後直接完成任務
                 setTimeout(() => {
                     showNotification('照片上傳成功！', "任務完成");
                     toggleModal('photo-upload-modal');
@@ -831,15 +807,12 @@
             toggleModal('photo-upload-modal');
         }
 
-        // 問答題任務
         function openQuizModal(location) {
             playerState.currentVerifyingLocation = location;
             const questionEl = document.getElementById('quiz-question');
             const optionsEl = document.getElementById('quiz-options');
-            
             questionEl.innerText = location.taskData.question;
-            optionsEl.innerHTML = ''; // 清空舊選項
-
+            optionsEl.innerHTML = '';
             location.taskData.options.forEach(optionText => {
                 const button = document.createElement('button');
                 button.innerText = optionText;
@@ -859,7 +832,15 @@
         }
 
         function completeTask(location) {
-            const taskLocation = locations.handicraft_culture.find(l => l.id === location.id);
+            let taskLocation = null;
+            for (const route in locations) {
+                const found = locations[route].find(l => l.id === location.id);
+                if (found) {
+                    taskLocation = found;
+                    break;
+                }
+            }
+
             if (!taskLocation || taskLocation.isCompleted) return;
             taskLocation.isCompleted = true; 
             if (markerObjects[location.id]) {
@@ -882,58 +863,57 @@
                     toggleModal('ar-simulation-modal');
                 }, 600);
             }
-            const activeRouteCheckbox = document.querySelector('#route-list input[type="checkbox"]:checked');
-            if (activeRouteCheckbox) {
-                const routeName = activeRouteCheckbox.id.replace('route-', '');
-                updateDistanceList(routeName);
-            } 
-        }
-
-        // --- 其他輔助函式 ---
-        let notificationTimeout;
-        function showUnlockNotification(locationName) {
-            const notification = document.getElementById('unlock-notification');
-            notification.textContent = `新任務已解鎖：${locationName}！`;
-            notification.style.top = '20px';
-            clearTimeout(notificationTimeout);
-            notificationTimeout = setTimeout(() => {
-                notification.style.top = '-100px';
-            }, 4000);
+            updateAllDistanceLists();
         }
 
         function toggleRoute(routeName) {
-            Object.values(markerObjects).forEach(marker => map.removeLayer(marker));
-            markerObjects = {};
             const checkbox = document.getElementById(`route-${routeName}`);
             if (checkbox.checked) {
-                locations[routeName].forEach(loc => {
-                    const iconToUse = loc.isCompleted ? completedIcon : defaultIcon;
-                    const marker = L.marker([loc.lat, loc.lng], { icon: iconToUse }).addTo(map);
-                    marker.on('click', () => showLocationDetails(loc));
-                    markerObjects[loc.id] = marker;
-                });
-                checkAndUnlockTasks(routeName);
-                updateDistanceList(routeName);
+                activeRoutes.add(routeName);
             } else {
-                document.getElementById('distance-ul').innerHTML = '<li>尚未選擇路線</li>';
+                activeRoutes.delete(routeName);
             }
+            redrawMarkers();
+            updateAllDistanceLists();
         }
 
-        function updateDistanceList(routeName) {
+        function redrawMarkers() {
+            Object.values(markerObjects).forEach(marker => map.removeLayer(marker));
+            markerObjects = {};
+            activeRoutes.forEach(routeName => {
+                if (locations[routeName]) {
+                    locations[routeName].forEach(loc => {
+                        if (!markerObjects[loc.id]) { // 防止重複添加
+                            const iconToUse = loc.isCompleted ? completedIcon : defaultIcon;
+                            const marker = L.marker([loc.lat, loc.lng], { icon: iconToUse }).addTo(map);
+                            marker.on('click', () => showLocationDetails(loc));
+                            markerObjects[loc.id] = marker;
+                        }
+                    });
+                }
+            });
+        }
+
+        function updateAllDistanceLists() {
             if (!playerMarker) return;
             const playerPos = playerMarker.getLatLng();
             const listEl = document.getElementById('distance-ul');
             listEl.innerHTML = '';
-            const uncompletedLocations = locations[routeName].filter(loc => !loc.isCompleted);
-            if (uncompletedLocations.length === 0) {
-                listEl.innerHTML = '<li>所有任務已完成！🎉</li>';
+
+            let allUncompleted = [];
+            activeRoutes.forEach(routeName => {
+                if (locations[routeName]) {
+                    allUncompleted.push(...locations[routeName].filter(loc => !loc.isCompleted));
+                }
+            });
+
+            if (allUncompleted.length === 0) {
+                listEl.innerHTML = activeRoutes.size > 0 ? '<li>所有任務已完成！🎉</li>' : '<li>尚未選擇路線</li>';
                 return;
             }
-            uncompletedLocations
-                .map(loc => {
-                    const distance = getDistanceInKm(playerPos.lat, playerPos.lng, loc.lat, loc.lng);
-                    return { name: loc.name, distance: distance };
-                })
+
+            allUncompleted
+                .map(loc => ({ name: loc.name, distance: getDistanceInKm(playerPos.lat, playerPos.lng, loc.lat, loc.lng) }))
                 .sort((a, b) => a.distance - b.distance)
                 .slice(0, 3)
                 .forEach(item => {
@@ -942,12 +922,12 @@
         }
 
         function checkAndUnlockTasks(routeName) {
-            if (!playerMarker || !routeName) return;
+            if (!playerMarker || !routeName || !locations[routeName]) return;
             const playerPos = playerMarker.getLatLng();
             locations[routeName].forEach(loc => {
                 if (!loc.isCompleted && !loc.isPlayable) {
                     const distance = getDistanceInKm(playerPos.lat, playerPos.lng, loc.lat, loc.lng);
-                    if (distance <= 5) {
+                    if (distance <= 5000) { // 解鎖距離增加到5公里
                         loc.isPlayable = true;
                         showUnlockNotification(loc.name);
                     }
@@ -1010,6 +990,13 @@
             } else {
                 showNotification("您的積分不足，無法兌換此商品。", "兌換失敗");
             }
+        }
+        
+        function showNotification(message, title = "提示") {
+            document.getElementById('notification-title').innerText = title;
+            document.getElementById('notification-message').innerText = message;
+            document.getElementById('notification-close-btn').onclick = () => toggleModal('notification-modal');
+            toggleModal('notification-modal');
         }
     </script>
 </body>
