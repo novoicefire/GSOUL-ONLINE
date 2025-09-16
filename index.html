@@ -406,10 +406,10 @@
             <button class="modal-close-btn" onclick="toggleModal('theme-modal')">X</button>
             <h2>選擇路線</h2>
             <div id="route-list">
-                <div class="route-item"><input type="checkbox" id="route-culture" onchange="toggleRoute('culture')"><label for="route-culture">文化路線</label></div>
-                <div class="route-item"><input type="checkbox" id="route-food" disabled><label for="route-food">蔬食路線 (未開放)</label></div>
-                <div class="route-item"><input type="checkbox" id="route-photo" disabled><label for="route-photo">網美路線 (未開放)</label></div>
-                <div class="route-item"><input type="checkbox" id="route-sport" disabled><label for="route-sport">體能路線 (未開放)</label></div>
+                <div class="route-item"><input type="checkbox" id="route-handicraft_culture" onchange="toggleRoute('handicraft_culture')"><label for="route-handicraft_culture">手作文化路線</label></div>
+                <div class="route-item"><input type="checkbox" id="route-natural_culture" disabled><label for="route-natural_culture">自然文化路線 (未開放)</label></div>
+                <div class="route-item"><input type="checkbox" id="route-farm_food_sustainability" disabled><label for="route-farm_food_sustainability">農食永續路線 (未開放)</label></div>
+                <div class="route-item"><input type="checkbox" id="route-indigenous_culture" disabled><label for="route-indigenous_culture">原住民文化路線 (未開放)</label></div>
             </div>
         </div>
     </div>
@@ -571,7 +571,7 @@
         }
         // --- 遊戲資料 (加入 taskType 和 taskData) ---
         const locations = {
-            'culture': [
+            'handicraft_culture': [
                 { id: 'cijing', name: '清境農場周邊部落', lat: 24.03419878283817, lng: 121.16023317696795, desc: '位於南投仁愛鄉，是賽德克族的重要聚居地。除了知名的清境農場，周邊的部落如博望新村、春陽部落保留了豐富的賽德克文化與歷史軌跡。', task: '打卡任務: 在部落入口的特色牌樓或圖騰前拍照，上傳照片以完成任務。', isPlayable: true, isCompleted: false, imageUrl: 'https://syatour.blog/wp-content/uploads/xuite/18804fe/5078229/1182473001_o.jpg', taskType: 'photo' },
                 { id: 'wushe', name: '霧社事件紀念公園', lat: 24.020534565829664, lng: 121.13260097280227, desc: '為紀念1930年霧社事件而建，是台灣原住民反抗日本殖民統治最重要的歷史地標，園區內有莫那魯道紀念碑、抗日群像等。', task: '歷史問答：霧社事件發生於西元幾年？', isPlayable: true, isCompleted: false, imageUrl: 'https://tcmbdata.culture.tw/api/collection/image/Culture_Place?uid=618664', taskType: 'quiz', taskData: { question: '霧社事件發生於西元幾年？', options: ['1920', '1930', '1945'], answer: '1930' } },
                 { id: 'lushan', name: '廬山溫泉部落', lat: 24.02384430840503, lng: 121.1889637317114, desc: '此地為霧社事件領導者莫那魯道的故鄉——馬赫坡社(Mahebo)舊址。雖然現今溫泉業已不如以往，但其歷史連結性與周邊的吊橋、溪谷景觀，使其成為一個充滿故事性的地點。', task: '尋寶任務: 設計成「尋寶任務」，要求玩家在特定範圍內(如廬山吊橋)尋找特定文化符號，目的是鼓勵玩家探索整個區域，發掘隱藏在細節中的歷史痕跡。', isPlayable: true, isCompleted: false, imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/2/20/%E5%8F%B0%E7%81%A3%E5%BB%AC%E5%B1%B1.JPG', taskType: 'photo' },
@@ -590,7 +590,10 @@
                 { id: 'hyaku_yama', name: 'hyaku yama ° 古道具店', lat: 23.96741498303542, lng: 120.68263883959376, desc: '位於竹山鎮，是結合古道具、工藝與茶文化的複合式展售空間。', task: '「舊物再生任務」: 店內提供「舊道具微改造體驗」，如重新布置茶具架、藍染布包裝小物，完成後上傳改造前後的對比照。', isPlayable: true, isCompleted: false, imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQan7Ti1iMKKJL8jTHoydCa_3SzSoI9DjPJYQ&s', taskType: 'photo' },
                 { id: 'akun_lemongrass', name: '阿坤香茅工坊', lat: 24.061336042336155, lng: 120.8923211387586, desc: '位於國姓鄉，由香茅農場轉型成的工坊，製作香茅皂、擴香等天然香草產品。', task: '「香草小配方」: 體驗「香茅防蚊膏」、「天然手工皂」或「香氛擴香石」DIY，玩家需選出合適材料並簡述「我的香味主題」。', isPlayable: true, isCompleted: false, imageUrl: 'https://scontent.frmq2-1.fna.fbcdn.net/v/t39.30808-6/480793754_3531064083868179_4736602933442005002_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=127cfc&_nc_ohc=2ljpPfZsnp0Q7kNvwENg70x&_nc_oc=AdmaKOH4vjZH2cK5VYfzMQImVNvgOnVhi9IpgkrpqX6NEQ3beLjU3wWerYL8qdyNPlA&_nc_zt=23&_nc_ht=scontent.frmq2-1.fna&_nc_gid=YclC0kqw884UhrEFietNBg&oh=00_AfPMsgp4Xa3pJhV3OXDmYMDxBmuyLO0eOUfcZ2iW9aA-YQ&oe=685374A7', taskType: 'photo' },
                 { id: 'craft_market', name: '工藝市集(草屯工藝中心旁)', lat: 23.98067259643174, lng: 120.69110079853942, desc: '不定期於草屯工藝中心舉辦，匯集全台工藝師與青年品牌的創意商品展售。', task: '「雙項工藝王」: 活動期間參與兩項DIY手作(如木刻鑰匙圈+草染手帕)，完成後自選1項作品上傳到APP並分享創作靈感獲得獎勵。', isPlayable: true, isCompleted: false, imageUrl: 'https://img.jatraveling.tw/2023/10/20231011204156_17.jpg', taskType: 'photo' },
-            ]
+            ],
+            'natural_culture': [],
+            'farm_food_sustainability': [],
+            'indigenous_culture': []
         };
 
         // --- 遊戲狀態 ---
@@ -718,7 +721,7 @@
                         const newPos = [position.coords.latitude, position.coords.longitude];
                         playerMarker.setLatLng(newPos); 
                         map.panTo(newPos); 
-                        checkAndUnlockTasks('culture');
+                        checkAndUnlockTasks('handicraft_culture');
                     }, 
                     () => {
                         console.log("無法取得GPS，地靈將停留在起始點。");
@@ -742,7 +745,7 @@
             navigateBtn.href = navUrl;
             
             const taskBtn = document.getElementById('accept-task-btn');
-            const taskLocation = locations.culture.find(l => l.id === location.id);
+            const taskLocation = locations.handicraft_culture.find(l => l.id === location.id);
 
             if (taskLocation && taskLocation.isCompleted) {
                  document.getElementById('location-task').innerText = "您已完成此地的任務！";
@@ -856,7 +859,7 @@
         }
 
         function completeTask(location) {
-            const taskLocation = locations.culture.find(l => l.id === location.id);
+            const taskLocation = locations.handicraft_culture.find(l => l.id === location.id);
             if (!taskLocation || taskLocation.isCompleted) return;
             taskLocation.isCompleted = true; 
             if (markerObjects[location.id]) {
