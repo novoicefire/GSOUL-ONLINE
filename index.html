@@ -610,7 +610,7 @@
                         lng: parseFloat(item.lng),
                         desc: item.desc,
                         task: item.task,
-                        isPlayable: false,
+                        isPlayable: true, // 為Demo直接設為可遊玩
                         isCompleted: false,
                         imageUrl: item.imageUrl,
                         taskType: item.taskType,
@@ -927,7 +927,7 @@
             locations[routeName].forEach(loc => {
                 if (!loc.isCompleted && !loc.isPlayable) {
                     const distance = getDistanceInKm(playerPos.lat, playerPos.lng, loc.lat, loc.lng);
-                    if (distance <= 5000) { // 解鎖距離增加到5公里
+                    if (distance <= 5) { // 解鎖距離從 5000km 修正為 5km
                         loc.isPlayable = true;
                         showUnlockNotification(loc.name);
                     }
