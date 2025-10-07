@@ -36,8 +36,8 @@
         /* 毛玻璃效果基底 */
         .glass-effect {
             /* 現在它只剩下這個功能，不再有背景色或圓角 */
-            backdrop-filter: blur(5px); /* 可以試著把模糊度調小一點 */
             -webkit-backdrop-filter: blur(5px);
+            backdrop-filter: blur(5px); /* 可以試著把模糊度調小一點 */
         }
 
         /* Logo 動畫 */
@@ -368,6 +368,11 @@
             border-color: #ff8a80;
             transform: scale(1.1);
         }
+        .bonus-text {
+            display: none;
+            color: #ff8a80;
+            font-weight: bold;
+        }
         /* --- ▲▲▲ 新增結束 ▲▲▲ --- */
     </style>
 </head>
@@ -388,7 +393,7 @@
                 <h3>距離最近的任務</h3>
                 <ul id="distance-ul"><li>尚未選擇路線</li></ul>
             </div>
-            <button id="theme-button"></button>
+            <button id="theme-button" title="選擇路線"></button>
         </div>
         <div id="bottom-nav" class="glass-effect">
             <div class="nav-btn" id="shop-btn"></div>
@@ -436,7 +441,7 @@
             <h2>任務完成！</h2>
             <div id="progress-bar-container">
                 <p>獲得積分: +100</p>
-                <p id="bonus-points-text" style="display:none; color: #ff8a80; font-weight: bold;">額外獲得: +500</p>
+                <p id="bonus-points-text" class="bonus-text">額外獲得: +500</p>
                 <div id="progress-bar"></div>
             </div>
         </div>
@@ -503,6 +508,37 @@
             <div id="quiz-options"></div>
         </div>
     </div>
+    <div id="inventory-modal" class="modal">
+        <div class="modal-background glass-effect"></div>
+        <div class="modal-content">
+            <button class="modal-close-btn" onclick="toggleModal('inventory-modal')">X</button>
+            <h2>背包</h2>
+            <div class="shop-tabs">
+                <div class="shop-tab active" onclick="switchInventoryTab('accessories')">配件</div>
+                <div class="shop-tab" onclick="switchInventoryTab('vouchers')">兌換券</div>
+            </div>
+            <div id="inventory-content-accessories" class="shop-content active">
+                <div class="shop-item"><span>地靈小草帽</span><span>x1</span></div>
+                <div class="shop-item"><span>潮流太陽眼鏡</span><span>x1</span></div>
+            </div>
+            <div id="inventory-content-vouchers" class="shop-content">
+                <p>目前沒有任何兌換券</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="profile-modal" class="modal">
+        <div class="modal-background glass-effect"></div>
+        <div class="modal-content">
+            <button class="modal-close-btn" onclick="toggleModal('profile-modal')">X</button>
+            <h2>個人資料</h2>
+            <img id="profile-char-img" src="player_character.png" style="width: 100px; height: 100px; border-radius: 50%; margin-bottom: 15px;">
+            <h3 id="profile-player-name" style="margin: 0 0 10px;">玩家名稱</h3>
+            <p>積分: <span id="profile-points">0</span></p>
+            <p>已完成任務: <span id="profile-completed-tasks">0</span></p>
+        </div>
+    </div>
+
     <!-- 全局通知 Modal  -->   
     <div id="notification-modal" class="modal">
         <div class="modal-background glass-effect"></div>
@@ -689,6 +725,8 @@
             updatePointsDisplay();
             document.getElementById('theme-button').addEventListener('click', () => toggleModal('theme-modal'));
             document.getElementById('shop-btn').addEventListener('click', () => toggleModal('shop-modal'));
+            document.getElementById('inventory-btn').addEventListener('click', () => toggleModal('inventory-modal'));
+            document.getElementById('profile-btn').addEventListener('click', () => toggleModal('profile-modal'));
             document.getElementById('map-btn').addEventListener('click', () => {
                 if (playerMarker) {
                     map.panTo(playerMarker.getLatLng());
