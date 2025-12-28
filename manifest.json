@@ -1,0 +1,21 @@
+{
+  "name": "地靈 ONLINE",
+  "short_name": "地靈 ONLINE",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#667eea",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "GSoulLogo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "GSoulLogo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

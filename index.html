@@ -1,267 +1,747 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>遊戲Demo - 地靈ONLINE</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-        <style>
+    <!-- PWA Settings -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#667eea">
+    <link rel="apple-touch-icon" href="GSoulLogo.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <style>
         /* --- ▼▼▼ 全域盒模型重設 (解決溢位問題的關鍵) ▼▼▼ --- */
         *,
         *::before,
         *::after {
             box-sizing: border-box;
         }
+
         /* 基本樣式 */
         html {
-            overflow: hidden !important; 
+            overflow: hidden !important;
         }
-        body, html {
-            margin: 0; padding: 0; height: 100%; width: 100%;
+
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            overflow: hidden !important; 
+            overflow: hidden !important;
         }
+
         #map {
-            height: 100%; width: 100%;
+            height: 100%;
+            width: 100%;
             filter: brightness(100%);
         }
+
         /* UI 覆蓋層 */
         .ui-overlay {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             pointer-events: none;
         }
-        .ui-overlay > * { pointer-events: all; }
+
+        .ui-overlay>* {
+            pointer-events: all;
+        }
 
         /* 毛玻璃效果基底 */
         .glass-effect {
             /* 現在它只剩下這個功能，不再有背景色或圓角 */
             -webkit-backdrop-filter: blur(5px);
-            backdrop-filter: blur(5px); /* 可以試著把模糊度調小一點 */
+            backdrop-filter: blur(5px);
+            /* 可以試著把模糊度調小一點 */
         }
 
         /* Logo 動畫 */
         #logo-splash {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             background-color: #f0f8ff;
-            display: flex; justify-content: center; align-items: center;
-            z-index: 10000; transition: opacity 2s ease-out;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            transition: opacity 2s ease-out;
         }
-        .splash-content { display: flex; flex-direction: column; align-items: center; }
-        #logo-splash.hidden { opacity: 0; pointer-events: none; }
+
+        .splash-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #logo-splash.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
         .logo-character {
-            width: 150px; height: 150px; background-image: url('GSoulLogo.png'); 
-            background-size: contain; background-repeat: no-repeat;
+            width: 150px;
+            height: 150px;
+            background-image: url('GSoulLogo.png');
+            background-size: contain;
+            background-repeat: no-repeat;
             animation: bounce 1s ease-in-out;
         }
+
         @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-            40% { transform: translateY(-30px); }
-            60% { transform: translateY(-15px); }
+
+            0%,
+            20%,
+            50%,
+            80%,
+            100% {
+                transform: translateY(0);
+            }
+
+            40% {
+                transform: translateY(-30px);
+            }
+
+            60% {
+                transform: translateY(-15px);
+            }
         }
+
         #loading-text {
-            margin-top: 20px; font-size: 18px; color: #666;
-            font-weight: bold; letter-spacing: 2px;
+            margin-top: 20px;
+            font-size: 18px;
+            color: #666;
+            font-weight: bold;
+            letter-spacing: 2px;
         }
+
         @keyframes text-shake {
-            0%, 100% { transform: translateX(0); }
-            10%, 30%, 50%, 70%, 90% { transform: translateX(-2px); }
-            20%, 40%, 60%, 80% { transform: translateX(2px); }
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            10%,
+            30%,
+            50%,
+            70%,
+            90% {
+                transform: translateX(-2px);
+            }
+
+            20%,
+            40%,
+            60%,
+            80% {
+                transform: translateX(2px);
+            }
         }
-        .shaking-text { animation: text-shake 1.5s ease-in-out infinite; }
-        
+
+        .shaking-text {
+            animation: text-shake 1.5s ease-in-out infinite;
+        }
+
         /* 頂部UI */
         .top-ui {
-            position: absolute; top: 20px; left: 20px; right: 20px;
-            display: flex; justify-content: space-between; align-items: flex-start;
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
         }
-        #distance-list { padding: 10px 20px; width: 250px;border-radius: 30px; border: 1px solid rgba(190, 190, 190, 0.2);}
-        #distance-list h3{ margin: 0 0 10px 0; font-size: 16px;}
-        #distance-list ul { list-style: none; padding: 0; margin: 0; }
-        #distance-list li { font-size: 14px; margin-bottom: 5px; }
+
+        #distance-list {
+            padding: 10px 20px;
+            width: 250px;
+            border-radius: 30px;
+            border: 1px solid rgba(190, 190, 190, 0.2);
+        }
+
+        #distance-list h3 {
+            margin: 0 0 10px 0;
+            font-size: 16px;
+        }
+
+        #distance-list ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        #distance-list li {
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
         #theme-button {
-            padding: 0; background-color: transparent; font-size: 0;
-            width: 105px; height: 90px;
-            background-image: url('theme_icon.png'); 
-            background-size: contain; background-position: center; background-repeat: no-repeat;
-            border: none; cursor: pointer;
+            padding: 0;
+            background-color: transparent;
+            font-size: 0;
+            width: 105px;
+            height: 90px;
+            background-image: url('theme_icon.png');
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            border: none;
+            cursor: pointer;
         }
 
         /* 底部導覽列 */
         #bottom-nav {
-            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
-            display: flex; align-items: center; justify-content: space-around;
-            width: 90%; max-width: 500px; padding: 10px; height: 80px;
-            border-radius: 30px; border: 1px solid rgba(190, 190, 190, 0.2);
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            width: 90%;
+            max-width: 500px;
+            padding: 10px;
+            height: 80px;
+            border-radius: 30px;
+            border: 1px solid rgba(190, 190, 190, 0.2);
         }
+
         .nav-btn {
-            border: none; border-radius: 10px; width: 60px; height: 60px;
-            display: flex; justify-content: center; align-items: center;
-            cursor: pointer; transition: transform 0.2s;
-            background-size: 100%; background-position: center; background-repeat: no-repeat;
+            border: none;
+            border-radius: 10px;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.2s;
+            background-size: 100%;
+            background-position: center;
+            background-repeat: no-repeat;
         }
-        #shop-btn { background-image: url('shop_icon.png'); }
-        #map-btn { background-image: url('map_icon.png'); }
-        #inventory-btn { background-image: url('inventory_icon.png'); }
-        #profile-btn { background-image: url('profile_icon.png'); }
-        .nav-btn:hover { transform: scale(1.1); }
+
+        #shop-btn {
+            background-image: url('shop_icon.png');
+        }
+
+        #map-btn {
+            background-image: url('map_icon.png');
+        }
+
+        #inventory-btn {
+            background-image: url('inventory_icon.png');
+        }
+
+        #profile-btn {
+            background-image: url('profile_icon.png');
+        }
+
+        .nav-btn:hover {
+            transform: scale(1.1);
+        }
+
         #points-display {
-            width: 90px; height: 90px; border-radius: 50%; background-color: #feb3c8;
-            font-size: 18px; font-weight: bold; color: #fff; margin: 0 10px;
-            display: flex; justify-content: center; align-items: center;
-            text-align: center; line-height: 1.2;
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background-color: #feb3c8;
+            font-size: 18px;
+            font-weight: bold;
+            color: #fff;
+            margin: 0 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            line-height: 1.2;
         }
-        
+
         /* 彈出視窗 (Modal) */
         .modal {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            display: none;justify-content: center; align-items: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+            justify-content: center;
+            align-items: center;
             z-index: 1000;
         }
+
         .modal-background {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: none; 
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
         }
-        .modal.active { display: flex; }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal.active .modal-content {
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                transform: translateY(30px) scale(0.95);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+        }
+
         .modal-content {
             box-sizing: border-box;
-            width: 90%; max-width: 500px; padding: 30px;
-            max-height: 80vh; overflow-y: auto;
-            
-            position: relative; /* 確保它能脫離文檔流，疊加在背景之上 */
-            z-index: 1;         /* 讓它的層級高於 .modal-background */
-            
-            /* 我將原本的毛玻璃樣式移到了 .glass-effect 中 */
-            background: rgba(255, 255, 255, 0.002);
-            border-radius: 30px;
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
-            border: 1px solid rgba(190, 190, 190, 0.5);
-
+            width: 90%;
+            max-width: 500px;
+            padding: 30px;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+            z-index: 1;
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
             display: flex;
             flex-direction: column;
             align-items: center;
         }
+
         .modal-close-btn {
-            position: absolute; top: 15px; right: 15px; background: #eee; border: none;
-            width: 30px; height: 30px; border-radius: 50%; font-size: 18px; cursor: pointer;
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #f0f0f0;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            font-size: 16px;
+            cursor: pointer;
+            color: #666;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        .modal-content h2 { margin-top: 0; }
-        .modal-content p { line-height: 1.6; }
+
+        .modal-close-btn:hover {
+            background: #e0e0e0;
+            color: #333;
+            transform: rotate(90deg);
+        }
+
+        .modal-content h2 {
+            margin: 0 0 20px;
+            font-size: 22px;
+            font-weight: 700;
+            color: #333;
+            text-align: center;
+        }
+
+        .modal-content p {
+            line-height: 1.7;
+            color: #555;
+        }
+
         .modal-content .action-btn {
-            width: 100%; padding: 15px; border: none; border-radius: 30px;
-            background-color: #4CAF50; color: white; font-size: 18px;
-            cursor: pointer; margin-top: 20px;
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
         }
-        .modal-content .action-btn:disabled { background-color: #ccc; cursor: not-allowed; }
-        
+
+        .modal-content .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+        }
+
+        .modal-content .action-btn:disabled {
+            background: linear-gradient(135deg, #ccc, #bbb);
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
         /* 路線選擇 & 商店 */
-        .route-item { display: flex; align-items: center; padding: 15px; border-bottom: 1px solid #eee; }
-        .route-item input[type="checkbox"] { width: 25px; height: 25px; margin-right: 15px; }
-        .route-item label { font-size: 18px; }
-        .shop-tabs { display: flex; border-bottom: 2px solid #ccc; margin-bottom: 20px; }
-        .shop-tab { padding: 10px 20px; cursor: pointer; font-size: 18px; border-bottom: 3px solid transparent; }
-        .shop-tab.active { border-bottom-color: #ff8a80; font-weight: bold; }
-        .shop-content { display: none; }
-        .shop-content.active { display: block; }
-        .shop-item {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 10px; border: 1px solid #eee; border-radius: 30px; margin-bottom: 10px;gap: 15px;
+        .route-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 8px;
+            transition: background 0.2s;
         }
-        .shop-item-buy-btn { padding: 8px 15px; border: none; background-color: #ff8a80; color: white; border-radius: 30px; cursor: pointer; }
+
+        .route-item:hover {
+            background: #f8f9fa;
+        }
+
+        .route-item input[type="checkbox"] {
+            width: 22px;
+            height: 22px;
+            margin-right: 15px;
+            accent-color: #667eea;
+        }
+
+        .route-item label {
+            font-size: 16px;
+            color: #333;
+            cursor: pointer;
+        }
+
+        .shop-tabs {
+            display: flex;
+            background: #f5f5f5;
+            border-radius: 12px;
+            padding: 4px;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+
+        .shop-tab {
+            flex: 1;
+            padding: 12px 16px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            border-radius: 10px;
+            text-align: center;
+            transition: all 0.3s;
+            color: #666;
+            border: none;
+            background: transparent;
+        }
+
+        .shop-tab.active {
+            background: white;
+            color: #333;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .shop-content {
+            display: none;
+            width: 100%;
+        }
+
+        .shop-content.active {
+            display: block;
+        }
+
+        .shop-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 16px;
+            background: #f8f9fa;
+            border: none;
+            border-radius: 14px;
+            margin-bottom: 10px;
+            gap: 12px;
+            transition: all 0.2s;
+        }
+
+        .shop-item:hover {
+            background: #f0f1f3;
+            transform: translateX(3px);
+        }
+
+        .shop-item-buy-btn {
+            padding: 10px 18px;
+            border: none;
+            background: linear-gradient(135deg, #ff8a80, #ff5252);
+            color: white;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 13px;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(255, 82, 82, 0.3);
+        }
+
+        .shop-item-buy-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(255, 82, 82, 0.4);
+        }
 
         /* 進度條 */
-        #progress-bar-container { text-align: center; }
-        #progress-bar { display: flex; justify-content: center; align-items: center; margin: 10px 0; }
-        .progress-node { width: 25px; height: 25px; border-radius: 50%; background-color: #e0e0e0; margin: 0 5px; position: relative; transition: all 0.5s; }
-        .progress-node.large { width: 35px; height: 35px; }
-        .progress-node.checked { background-color: #4CAF50; }
-        .progress-node.checked::after { content: '✔'; color: white; font-size: 16px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
-        .progress-node.large.checked::after{ font-size: 20px; }
-        .progress-node.reward-icon { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="%23888" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>'); background-size: 60%; background-position: center; background-repeat: no-repeat; }
-        .progress-node.reward-icon.checked { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="white" d="M20 6H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-2 2l-6 4.5L6 8h12z"/></svg>'); }
-        
-        /* 圖片與導航按鈕 */
-        .image-container { position: relative; margin-bottom: 15px; }
-        #location-image { width:100%; height: auto; border-radius: 30px; object-fit: cover; max-height: 200px; display: block; }
-        #navigate-btn {
-            position: absolute; bottom: 10px; right: 10px; width: 50px; height: 50px;
-            background-color: white; border-radius: 50%;
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><path fill="%234285F4" d="M215.7 499.2C267 435 384 279.4 384 192C384 86 298 0 192 0S0 86 0 192c0 87.4 117 243 168.3 307.2c12.3 15.3 35.1 15.3 47.4 0zM192 256c-35.3 0-64-28.7-64-64s28.7-64 64-64s64 28.7 64 64s-28.7 64-64 64z"/></svg>');
-            background-size: 55%; background-position: center; background-repeat: no-repeat;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.3); transition: transform 0.2s ease-in-out;
+        #progress-bar-container {
+            text-align: center;
         }
-        #navigate-btn:hover { transform: scale(1.1); }
+
+        #progress-bar {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 10px 0;
+        }
+
+        .progress-node {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            background-color: #e0e0e0;
+            margin: 0 5px;
+            position: relative;
+            transition: all 0.5s;
+        }
+
+        .progress-node.large {
+            width: 35px;
+            height: 35px;
+        }
+
+        .progress-node.checked {
+            background-color: #4CAF50;
+        }
+
+        .progress-node.checked::after {
+            content: '✔';
+            color: white;
+            font-size: 16px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .progress-node.large.checked::after {
+            font-size: 20px;
+        }
+
+        .progress-node.reward-icon {
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="%23888" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>');
+            background-size: 60%;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        .progress-node.reward-icon.checked {
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="white" d="M20 6H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-2 2l-6 4.5L6 8h12z"/></svg>');
+        }
+
+        /* 圖片與導航按鈕 */
+        .image-container {
+            position: relative;
+            margin-bottom: 15px;
+        }
+
+        #location-image {
+            width: 100%;
+            height: auto;
+            border-radius: 30px;
+            object-fit: cover;
+            max-height: 200px;
+            display: block;
+        }
+
+        #navigate-btn {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            width: 50px;
+            height: 50px;
+            background-color: white;
+            border-radius: 50%;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><path fill="%234285F4" d="M215.7 499.2C267 435 384 279.4 384 192C384 86 298 0 192 0S0 86 0 192c0 87.4 117 243 168.3 307.2c12.3 15.3 35.1 15.3 47.4 0zM192 256c-35.3 0-64-28.7-64-64s28.7-64 64-64s64 28.7 64 64s-28.7 64-64 64z"/></svg>');
+            background-size: 55%;
+            background-position: center;
+            background-repeat: no-repeat;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s ease-in-out;
+        }
+
+        #navigate-btn:hover {
+            transform: scale(1.1);
+        }
 
         /* 任務解鎖與驗證視窗樣式 */
         #unlock-notification {
-            position: fixed; top: -100px; left: 50%; transform: translateX(-50%);
-            padding: 15px 25px; background-color: #28a745; color: white; font-weight: bold;
-            border-radius: 30px; box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-            z-index: 9999; transition: top 0.5s ease-in-out;
+            position: fixed;
+            top: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 15px 25px;
+            background-color: #28a745;
+            color: white;
+            font-weight: bold;
+            border-radius: 30px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            z-index: 9999;
+            transition: top 0.5s ease-in-out;
         }
+
         #verification-input {
-            width: calc(100% - 20px); padding: 10px; font-size: 16px;
-            border-radius: 30px; border: 1px solid #ccc; margin-bottom: 15px; text-align: center;
+            width: calc(100% - 20px);
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 30px;
+            border: 1px solid #ccc;
+            margin-bottom: 15px;
+            text-align: center;
         }
+
         .action-btn-secondary {
-            width: 100%; padding: 15px; border: none; border-radius: 30px;
-            background-color: #6c757d; color: white; font-size: 18px;
-            cursor: pointer; margin-top: 10px;
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 30px;
+            background-color: #6c757d;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            margin-top: 10px;
         }
+
         #photo-preview {
-            width: 100%; height: 150px; background-color: #e0e0e0;
-            border: 2px dashed #ccc; border-radius: 30px; margin-bottom: 15px;
-            display: flex; justify-content: center; align-items: center; color: #888;
+            width: 100%;
+            height: 150px;
+            background-color: #e0e0e0;
+            border: 2px dashed #ccc;
+            border-radius: 30px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #888;
         }
+
         #upload-photo-btn {
-            display: flex; align-items: center; justify-content: center;
-            width: auto; padding: 10px 25px; margin-top: 15px;
-            background-color: #4CAF50; color: white; font-size: 16px;
-            border: none; border-radius: 30px; cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: auto;
+            padding: 10px 25px;
+            margin-top: 15px;
+            background-color: #4CAF50;
+            color: white;
+            font-size: 16px;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
         }
-        #upload-photo-btn svg { margin-right: 8px; }
+
+        #upload-photo-btn svg {
+            margin-right: 8px;
+        }
+
         #quiz-options button {
-            display: block; width: 100%; padding: 15px; margin-top: 10px;
-            font-size: 16px; border: 1px solid #ccc; border-radius: 30px;
-            background-color: white; cursor: pointer;
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin-top: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 30px;
+            background-color: white;
+            cursor: pointer;
         }
 
         /* --- 手機版響應式設計 (Media Query) --- */
         @media (max-width: 600px) {
 
             /* --- 1. 全局UI調整 --- */
-            .top-ui { top: 10px; left: 10px; right: 10px; }
-            #distance-list { width: 220px; padding: 8px 15px; border-radius: 30px; }
-            #distance-list h3 { font-size: 14px; }
-            #distance-list li { font-size: 12px; }
-            #theme-button { width: 84px; height: 72px; }
-            #bottom-nav { height: 70px; padding: 5px; bottom: 10px; }
-            .nav-btn { width: 50px; height: 50px; }
-            #points-display { width: 80px; height: 80px; font-size: 16px; }
+            .top-ui {
+                top: 10px;
+                left: 10px;
+                right: 10px;
+            }
+
+            #distance-list {
+                width: 220px;
+                padding: 8px 15px;
+                border-radius: 30px;
+            }
+
+            #distance-list h3 {
+                font-size: 14px;
+            }
+
+            #distance-list li {
+                font-size: 12px;
+            }
+
+            #theme-button {
+                width: 84px;
+                height: 72px;
+            }
+
+            #bottom-nav {
+                height: 70px;
+                padding: 5px;
+                bottom: 10px;
+            }
+
+            .nav-btn {
+                width: 50px;
+                height: 50px;
+            }
+
+            #points-display {
+                width: 80px;
+                height: 80px;
+                font-size: 16px;
+            }
 
             /* --- 【核心】所有彈出視窗的通用自適應樣式 --- */
             .modal-content {
-                padding: 20px 15px; 
+                padding: 20px 15px;
                 max-height: 85vh;
             }
+
             .modal-close-btn {
-                width: 28px; height: 28px; font-size: 16px;
-                top: 10px; right: 10px;
+                width: 28px;
+                height: 28px;
+                font-size: 16px;
+                top: 10px;
+                right: 10px;
             }
+
             /* 所有視窗內的標題 */
             .modal-content h2 {
                 font-size: 20px;
                 margin-bottom: 15px;
             }
+
             /* 所有視窗內的段落文字 */
             .modal-content p {
                 font-size: 14px;
                 line-height: 1.5;
             }
+
             /* 所有視窗內的主要按鈕和次要按鈕 */
             .modal-content .action-btn,
             .action-btn-secondary {
@@ -271,111 +751,994 @@
             }
 
             /* --- 針對特定視窗的微調 --- */
-            
+
             /* 景點介紹視窗 */
-            #location-image { max-height: 150px; }
-            #navigate-btn { width: 45px; height: 45px; } /* 導航按鈕縮小一點 */
-            
+            #location-image {
+                max-height: 150px;
+            }
+
+            #navigate-btn {
+                width: 45px;
+                height: 45px;
+            }
+
+            /* 導航按鈕縮小一點 */
+
             /* 商店視窗 */
-            .shop-tab { padding: 15px 15px; font-size: 16px; }
-            .shop-item-buy-btn { padding: 6px 8px; font-size: 14px; }
-            .shop-item span { font-size: 15px; } /* 商品名稱字體縮小 */
+            .shop-tab {
+                padding: 15px 15px;
+                font-size: 16px;
+            }
+
+            .shop-item-buy-btn {
+                padding: 6px 8px;
+                font-size: 14px;
+            }
+
+            .shop-item span {
+                font-size: 15px;
+            }
+
+            /* 商品名稱字體縮小 */
 
             /* 進度條視窗 */
-            #progress-bar { transform: scale(0.9); } /* 將整個進度條稍微縮小 */
+            #progress-bar {
+                transform: scale(0.9);
+            }
+
+            /* 將整個進度條稍微縮小 */
 
             /* 拍照上傳視窗 */
-            #upload-photo-btn { padding: 10px 20px; }
-            #photo-preview { height: 120px; } /* 預覽框高度縮小 */
+            #upload-photo-btn {
+                padding: 10px 20px;
+            }
+
+            #photo-preview {
+                height: 120px;
+            }
+
+            /* 預覽框高度縮小 */
 
             /* 問答題視窗 */
-            #quiz-options button { padding: 12px; font-size: 15px; }
+            #quiz-options button {
+                padding: 12px;
+                font-size: 15px;
+            }
 
             /* 驗證碼輸入框 */
-            #verification-input { font-size: 15px; padding: 8px; }
+            #verification-input {
+                font-size: 15px;
+                padding: 8px;
+            }
 
             /* 通知視窗 */
-            #notification-close-btn { font-size: 16px; }
+            #notification-close-btn {
+                font-size: 16px;
+            }
         }
+
         .modal-content h2,
         .modal-content p {
-            text-align: center; /* 讓文字本身也水平置中 */
+            text-align: center;
+            /* 讓文字本身也水平置中 */
         }
+
         /* --- 通知視窗按鈕的專屬樣式 --- */
         #notification-modal {
-            z-index: 2000; /* 確保通知視窗在最上層 */
+            z-index: 2000;
+            /* 確保通知視窗在最上層 */
         }
+
         #notification-close-btn {
-            background-color: #17a2b8; /* 使用一個不同的、中性的顏色 */
+            background-color: #17a2b8;
+            /* 使用一個不同的、中性的顏色 */
             margin-top: 25px;
         }
+
         /* --- 調整景點介紹視窗內部的垂直間距 --- */
         #location-modal-content h3 {
-            margin-top: 5px;     /* 「任務」標題與上方介紹區塊的間距 */
-            margin-bottom: 5px;   /* 「任務」標題與下方任務說明的間距 */
+            margin-top: 5px;
+            /* 「任務」標題與上方介紹區塊的間距 */
+            margin-bottom: 5px;
+            /* 「任務」標題與下方任務說明的間距 */
         }
 
         #location-modal-content #location-task {
-            margin-top: 5;        /* 任務說明區塊與上方「任務」標題的間距 */
-            margin-bottom: 5px;  /* 任務說明區塊與下方「開始任務」按鈕的間距 */
+            margin-top: 5;
+            /* 任務說明區塊與上方「任務」標題的間距 */
+            margin-bottom: 5px;
+            /* 任務說明區塊與下方「開始任務」按鈕的間距 */
         }
-        /* --- ▼▼▼ 新增：登入與角色創建樣式 ▼▼▼ --- */
+
+        /* --- ▼▼▼ 登入流程增強樣式 ▼▼▼ --- */
+        /* 登入彈窗特殊樣式 - 遵照個人資料頁設計風格 */
+        /* 登入彈窗特殊樣式 - 遵照個人資料頁設計風格 */
+        #login-modal .modal-content,
+        #create-account-modal .modal-content,
+        #location-permission-modal .modal-content {
+            padding: 0;
+            overflow: hidden;
+            /* 關鍵：確保圓角被裁切 */
+            max-width: 420px;
+            border-radius: 25px;
+            display: flex;
+            flex-direction: column;
+            max-height: 85vh;
+            /* 確保有最大高度 */
+        }
+
+        /* 共用頁首樣式 - 與個人資料頁相同 */
+        .login-header,
+        .create-header,
+        .permission-header {
+            flex: 0 0 auto;
+            /* 固定高度，不被壓縮 */
+            width: 100%;
+            background: linear-gradient(-45deg, #667eea, #764ba2, #f093fb, #667eea);
+            background-size: 400% 400%;
+            animation: gradientShift 8s ease infinite;
+            color: white;
+            padding: 35px 25px 25px;
+            text-align: center;
+            position: relative;
+            border-radius: 25px 25px 0 0;
+            overflow: hidden;
+            z-index: 2;
+            /* 確保陰影覆蓋 body */
+        }
+
+        /* 裝飾性背景圓形 - 與個人資料頁相同 */
+        .login-header::before,
+        .create-header::before,
+        .permission-header::before {
+            content: '';
+            position: absolute;
+            top: -50px;
+            right: -50px;
+            width: 150px;
+            height: 150px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            z-index: 0;
+        }
+
+        .login-header::after,
+        .create-header::after,
+        .permission-header::after {
+            content: '';
+            position: absolute;
+            bottom: -30px;
+            left: -30px;
+            width: 100px;
+            height: 100px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 50%;
+            z-index: 0;
+        }
+
+        .login-header .welcome-emoji,
+        .permission-header .permission-icon {
+            font-size: 64px;
+            margin-bottom: 15px;
+            position: relative;
+            z-index: 1;
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-8px);
+            }
+        }
+
+        .login-header h2,
+        .create-header h2,
+        .permission-header h2 {
+            margin: 0 0 8px;
+            font-size: 22px;
+            color: white !important;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            position: relative;
+            z-index: 1;
+        }
+
+        .login-header p,
+        .create-header p {
+            margin: 0;
+            opacity: 0.9;
+            font-size: 14px;
+            color: white !important;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* 共用內容區域樣式 - 與個人資料頁相同 */
+        /* 共用內容區域樣式 - 與個人資料頁相同 */
+        .login-body,
+        .create-body,
+        .permission-body {
+            flex: 1 1 auto;
+            /* 自動填滿剩餘空間 */
+            overflow-y: auto;
+            /* 內部捲動 */
+            width: 100%;
+            padding: 25px;
+            background: linear-gradient(180deg, #f8f9ff 0%, #ffffff 100%);
+        }
+
+        .login-features {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+
+        .login-feature {
+            text-align: center;
+        }
+
+        .login-feature-icon {
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+
+        .login-feature-text {
+            font-size: 11px;
+            color: #666;
+        }
+
         #google-login-btn {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 15px;
-            background-color: #4285F4;
-            color: white;
-            font-size: 18px;
-            font-weight: bold;
-            border: none;
-            border-radius: 30px;
-            padding: 15px 30px;
+            gap: 12px;
+            width: 100%;
+            background: white;
+            color: #333;
+            font-size: 15px;
+            font-weight: 600;
+            border: 1px solid #ddd;
+            border-radius: 14px;
+            padding: 14px 20px;
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.1);
         }
+
         #google-login-btn:hover {
-            background-color: #357ae8;
+            background: #f8f9fa;
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.2);
+            transform: translateY(-2px);
         }
-        #player-name-input {
-            width: 80%;
-            padding: 12px;
-            font-size: 16px;
-            text-align: center;
-            border: 1px solid #ccc;
-            border-radius: 30px;
+
+        #google-login-btn svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* 創建帳號步驟指示器 */
+        .create-steps {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 15px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .create-step {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.4);
+        }
+
+        .create-step.active {
+            background: white;
+            width: 30px;
+            border-radius: 5px;
+        }
+
+        .create-body {
+            width: 100%;
+            padding: 25px 30px;
+        }
+
+        .input-group {
             margin-bottom: 20px;
         }
+
+        .input-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        #player-name-input {
+            width: 100%;
+            padding: 14px 18px;
+            font-size: 16px;
+            text-align: left;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            transition: all 0.3s;
+            box-sizing: border-box;
+        }
+
+        #player-name-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+
         #character-selection {
             display: flex;
-            gap: 20px;
+            gap: 15px;
+            justify-content: center;
             margin-bottom: 20px;
         }
+
         .char-option {
             cursor: pointer;
+            background: #f8f9fa;
             border: 3px solid transparent;
-            border-radius: 15px;
-            padding: 5px;
+            border-radius: 20px;
+            padding: 15px;
             transition: all 0.3s;
+            text-align: center;
         }
+
+        .char-option:hover {
+            background: #f0f0f0;
+        }
+
         .char-option img {
             width: 80px;
             height: 80px;
             display: block;
+            margin-bottom: 8px;
         }
+
+        .char-option .char-name {
+            font-size: 12px;
+            color: #666;
+            font-weight: 500;
+        }
+
         .char-option.selected {
-            border-color: #ff8a80;
-            transform: scale(1.1);
+            border-color: #667eea;
+            background: #f0f4ff;
+            transform: scale(1.05);
         }
+
+        .char-option.selected .char-name {
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        /* 位置權限彈窗特有樣式 */
+
+        .permission-reasons {
+            margin-bottom: 20px;
+        }
+
+        .permission-reason {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .permission-reason:last-child {
+            border-bottom: none;
+        }
+
+        .permission-reason-icon {
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+
+        .permission-reason-text {
+            font-size: 14px;
+            color: #555;
+            line-height: 1.5;
+        }
+
+        .permission-note {
+            font-size: 12px;
+            color: #999;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
         .bonus-text {
             display: none;
             color: #ff8a80;
             font-weight: bold;
         }
-        /* --- ▲▲▲ 新增結束 ▲▲▲ --- */
+
+        /* --- ▲▲▲ 登入流程增強樣式結束 ▲▲▲ --- */
+
+        /* --- ▼▼▼ 會議展示功能樣式 ▼▼▼ --- */
+        /* 點數兌換視窗 */
+        #exchange-modal .modal-content {
+            background: linear-gradient(135deg, rgba(0, 150, 136, 0.95), rgba(0, 121, 107, 0.95));
+            color: white;
+        }
+
+        #exchange-modal h2 {
+            color: white;
+        }
+
+        #exchange-modal p {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .exchange-info {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 15px 0;
+            text-align: center;
+        }
+
+        .exchange-info .points-value {
+            font-size: 48px;
+            font-weight: bold;
+            display: block;
+            margin: 10px 0;
+        }
+
+        .exchange-arrow {
+            font-size: 32px;
+            margin: 15px 0;
+        }
+
+        .exchange-result {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+
+        .exchange-result .result-value {
+            font-size: 36px;
+            font-weight: bold;
+            color: #FFD700;
+        }
+
+        #confirm-exchange-btn {
+            background-color: #FFD700 !important;
+            color: #00796B !important;
+            font-weight: bold;
+        }
+
+        .exchange-success {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .exchange-success.show {
+            display: block;
+        }
+
+        .exchange-success .checkmark {
+            font-size: 64px;
+            animation: pop 0.5s ease;
+        }
+
+        @keyframes pop {
+            0% {
+                transform: scale(0);
+            }
+
+            50% {
+                transform: scale(1.2);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        /* 儀表板視窗 */
+        #dashboard-modal .modal-content {
+            background: linear-gradient(135deg, rgba(33, 150, 243, 0.95), rgba(25, 118, 210, 0.95));
+            color: white;
+            max-width: 550px;
+        }
+
+        #dashboard-modal h2 {
+            color: white;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 15px 10px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .stat-card .stat-value {
+            font-size: 28px;
+            font-weight: bold;
+            display: block;
+        }
+
+        .stat-card .stat-label {
+            font-size: 12px;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+
+        .ranking-list {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 15px;
+            text-align: left;
+        }
+
+        .ranking-list h4 {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        .ranking-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .ranking-item:last-child {
+            border-bottom: none;
+        }
+
+        .ranking-item .rank {
+            width: 25px;
+            font-weight: bold;
+            color: #FFD700;
+        }
+
+        .ranking-item .name {
+            flex: 1;
+        }
+
+        .ranking-item .count {
+            font-weight: bold;
+        }
+
+        /* 儀表板入口按鈕 */
+        #dashboard-btn {
+            position: absolute;
+            top: 20px;
+            right: 140px;
+            width: 50px;
+            height: 50px;
+            background-color: #2196F3;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+
+        #dashboard-btn svg {
+            fill: white;
+            width: 24px;
+            height: 24px;
+        }
+
+        #dashboard-btn:hover {
+            transform: scale(1.1);
+        }
+
+        /* 積分圓球可點擊樣式 */
+        #points-display {
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        #points-display:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(254, 179, 200, 0.5);
+        }
+
+        /* --- ▼▼▼ 個人資料頁面增強樣式 ▼▼▼ --- */
+        #profile-modal .modal-content {
+            max-width: 420px;
+            max-height: 85vh;
+            padding: 0;
+            overflow-y: auto;
+            border-radius: 25px;
+        }
+
+        .profile-header {
+            width: 100%;
+            background: linear-gradient(-45deg, #667eea, #764ba2, #f093fb, #667eea);
+            background-size: 400% 400%;
+            animation: gradientShift 8s ease infinite;
+            color: white;
+            padding: 35px 25px 25px;
+            text-align: center;
+            position: relative;
+            border-radius: 25px 25px 0 0;
+        }
+
+        @keyframes gradientShift {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        /* 裝飾性背景圓形 */
+        .profile-header::before {
+            content: '';
+            position: absolute;
+            top: -50px;
+            right: -50px;
+            width: 150px;
+            height: 150px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            z-index: 0;
+        }
+
+        .profile-header::after {
+            content: '';
+            position: absolute;
+            bottom: -30px;
+            left: -30px;
+            width: 100px;
+            height: 100px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 50%;
+            z-index: 0;
+        }
+
+        .profile-header .modal-close-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            color: white;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .profile-header .modal-close-btn:hover {
+            background: rgba(255, 255, 255, 0.4);
+            transform: rotate(90deg);
+        }
+
+        .profile-avatar-container {
+            position: relative;
+            display: inline-block;
+            z-index: 1;
+        }
+
+        .profile-avatar {
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            border: 4px solid white;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25), 0 0 0 0 rgba(255, 255, 255, 0.4);
+            animation: avatarPulse 3s ease-in-out infinite;
+            transition: transform 0.3s;
+        }
+
+        .profile-avatar:hover {
+            transform: scale(1.05);
+        }
+
+        @keyframes avatarPulse {
+
+            0%,
+            100% {
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25), 0 0 0 0 rgba(255, 255, 255, 0.4);
+            }
+
+            50% {
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25), 0 0 0 15px rgba(255, 255, 255, 0);
+            }
+        }
+
+        .profile-accessory {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 32px;
+            animation: accessoryBounce 2s ease-in-out infinite;
+        }
+
+        @keyframes accessoryBounce {
+
+            0%,
+            100% {
+                transform: translateX(-50%) translateY(0);
+            }
+
+            50% {
+                transform: translateX(-50%) translateY(-5px);
+            }
+        }
+
+        .profile-name {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 18px 0 8px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            position: relative;
+            z-index: 1;
+        }
+
+        .profile-level {
+            font-size: 14px;
+            opacity: 0.9;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+            display: inline-block;
+            backdrop-filter: blur(5px);
+            position: relative;
+            z-index: 1;
+        }
+
+        .profile-body {
+            padding: 25px;
+            position: relative;
+            z-index: 2;
+            background: linear-gradient(180deg, #f8f9ff 0%, #ffffff 100%);
+        }
+
+        .profile-stats-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 22px;
+        }
+
+        .profile-stat-item {
+            background: white;
+            padding: 18px 12px;
+            border-radius: 16px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.1);
+            border: 1px solid rgba(102, 126, 234, 0.1);
+            transition: all 0.3s;
+        }
+
+        .profile-stat-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.2);
+        }
+
+        .profile-stat-value {
+            font-size: 26px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .profile-stat-label {
+            font-size: 11px;
+            color: #888;
+            margin-top: 5px;
+            font-weight: 500;
+        }
+
+        .profile-section {
+            margin-bottom: 20px;
+        }
+
+        .profile-section-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: #999;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .achievement-grid {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .achievement-badge {
+            width: 55px;
+            height: 55px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            position: relative;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .achievement-badge:hover {
+            transform: scale(1.15) rotate(5deg);
+        }
+
+        .achievement-badge.unlocked {
+            background: linear-gradient(135deg, #FFD700, #FFA000);
+            box-shadow: 0 4px 15px rgba(255, 193, 7, 0.4);
+        }
+
+        .achievement-badge.unlocked::after {
+            content: '';
+            position: absolute;
+            inset: -3px;
+            border-radius: 17px;
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.5), transparent);
+            z-index: -1;
+            animation: badgeGlow 2s ease-in-out infinite;
+        }
+
+        @keyframes badgeGlow {
+
+            0%,
+            100% {
+                opacity: 0.5;
+            }
+
+            50% {
+                opacity: 1;
+            }
+        }
+
+        .achievement-badge.locked {
+            background: #e8e8e8;
+            filter: grayscale(1);
+            opacity: 0.5;
+        }
+
+        .nantou-points-card {
+            background: linear-gradient(135deg, #00897B, #00695C);
+            color: white;
+            padding: 18px;
+            border-radius: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 6px 20px rgba(0, 121, 107, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nantou-points-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% {
+                transform: translateX(-100%) rotate(45deg);
+            }
+
+            100% {
+                transform: translateX(100%) rotate(45deg);
+            }
+        }
+
+        .nantou-points-card .points-info h4 {
+            margin: 0;
+            font-size: 12px;
+            opacity: 0.85;
+            font-weight: 400;
+        }
+
+        .nantou-points-card .points-value {
+            font-size: 30px;
+            font-weight: bold;
+        }
+
+        .nantou-points-card .points-logo {
+            font-size: 32px;
+        }
+
+        .profile-action-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: transform 0.2s;
+        }
+
+        .profile-action-btn:hover {
+            transform: scale(1.02);
+        }
+
+        /* --- ▲▲▲ 個人資料頁面增強樣式結束 ▲▲▲ --- */
+
+
+        @media (max-width: 600px) {
+            #dashboard-btn {
+                top: 10px;
+                right: 110px;
+                width: 40px;
+                height: 40px;
+            }
+
+            #dashboard-btn svg {
+                width: 20px;
+                height: 20px;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 8px;
+            }
+
+            .stat-card .stat-value {
+                font-size: 22px;
+            }
+
+            .stat-card .stat-label {
+                font-size: 10px;
+            }
+
+
+        }
+
+        /* --- ▲▲▲ 會議展示功能樣式結束 ▲▲▲ --- */
     </style>
 </head>
+
 <body>
 
     <div id="logo-splash">
@@ -391,7 +1754,9 @@
         <div class="top-ui">
             <div id="distance-list" class="glass-effect">
                 <h3>距離最近的任務</h3>
-                <ul id="distance-ul"><li>尚未選擇路線</li></ul>
+                <ul id="distance-ul">
+                    <li>尚未選擇路線</li>
+                </ul>
             </div>
             <button id="theme-button" title="選擇路線"></button>
         </div>
@@ -403,7 +1768,7 @@
             <div class="nav-btn" id="profile-btn"></div>
         </div>
     </div>
-    
+
     <!-- Modals -->
     <div id="theme-modal" class="modal">
         <div class="modal-background glass-effect"></div>
@@ -411,10 +1776,18 @@
             <button class="modal-close-btn" onclick="toggleModal('theme-modal')">X</button>
             <h2>選擇路線</h2>
             <div id="route-list">
-                <div class="route-item"><input type="checkbox" id="route-handicraft_culture" onchange="toggleRoute('handicraft_culture')"><label for="route-handicraft_culture">手作文化路線</label></div>
-                <div class="route-item"><input type="checkbox" id="route-natural_culture" onchange="toggleRoute('natural_culture')"><label for="route-natural_culture">自然文化路線</label></div>
-                <div class="route-item"><input type="checkbox" id="route-farm_food_sustainability" onchange="toggleRoute('farm_food_sustainability')"><label for="route-farm_food_sustainability">農食永續路線</label></div>
-                <div class="route-item"><input type="checkbox" id="route-indigenous_culture" onchange="toggleRoute('indigenous_culture')"><label for="route-indigenous_culture">原住民文化路線</label></div>
+                <div class="route-item"><input type="checkbox" id="route-handicraft_culture"
+                        onchange="toggleRoute('handicraft_culture')"><label
+                        for="route-handicraft_culture">手作文化路線</label></div>
+                <div class="route-item"><input type="checkbox" id="route-natural_culture"
+                        onchange="toggleRoute('natural_culture')"><label for="route-natural_culture">自然文化路線</label>
+                </div>
+                <div class="route-item"><input type="checkbox" id="route-farm_food_sustainability"
+                        onchange="toggleRoute('farm_food_sustainability')"><label
+                        for="route-farm_food_sustainability">農食永續路線</label></div>
+                <div class="route-item"><input type="checkbox" id="route-indigenous_culture"
+                        onchange="toggleRoute('indigenous_culture')"><label
+                        for="route-indigenous_culture">原住民文化路線</label></div>
             </div>
         </div>
     </div>
@@ -422,16 +1795,16 @@
     <div id="location-modal" class="modal">
         <div class="modal-background glass-effect"></div>
         <div id="location-modal-content" class="modal-content">
-             <button class="modal-close-btn" onclick="toggleModal('location-modal')">X</button>
-             <h2 id="location-title"></h2>
-             <div class="image-container">
+            <button class="modal-close-btn" onclick="toggleModal('location-modal')">X</button>
+            <h2 id="location-title"></h2>
+            <div class="image-container">
                 <img id="location-image" src="" alt="景點圖片">
                 <a id="navigate-btn" href="#" target="_blank" title="前往導航"></a>
-             </div>
-             <p id="location-desc"></p>
-             <h3>任務</h3>
-             <p id="location-task"></p>
-             <button id="accept-task-btn" class="action-btn">接受任務</button>
+            </div>
+            <p id="location-desc"></p>
+            <h3>任務</h3>
+            <p id="location-task"></p>
+            <button id="accept-task-btn" class="action-btn">接受任務</button>
         </div>
     </div>
     <div id="progress-modal" class="modal">
@@ -456,12 +1829,16 @@
                 <div class="shop-tab" onclick="switchShopTab('vouchers')">兌換券</div>
             </div>
             <div id="shop-content-accessories" class="shop-content active">
-                <div class="shop-item"><span>地靈小草帽</span><button class="shop-item-buy-btn" onclick="buyItem(200)">200 積分</button></div>
-                <div class="shop-item"><span>潮流太陽眼鏡</span><button class="shop-item-buy-btn" onclick="buyItem(350)">350 積分</button></div>
+                <div class="shop-item"><span>地靈小草帽</span><button class="shop-item-buy-btn" onclick="buyItem(200)">200
+                        積分</button></div>
+                <div class="shop-item"><span>潮流太陽眼鏡</span><button class="shop-item-buy-btn" onclick="buyItem(350)">350
+                        積分</button></div>
             </div>
             <div id="shop-content-vouchers" class="shop-content">
-                <div class="shop-item"><span>馬告香腸兌換券</span><button class="shop-item-buy-btn" onclick="buyItem(500)">500 積分</button></div>
-                <div class="shop-item"><span>手作愛玉冰兌換券</span><button class="shop-item-buy-btn" onclick="buyItem(400)">400 積分</button></div>
+                <div class="shop-item"><span>馬告香腸兌換券</span><button class="shop-item-buy-btn" onclick="buyItem(500)">500
+                        積分</button></div>
+                <div class="shop-item"><span>手作愛玉冰兌換券</span><button class="shop-item-buy-btn" onclick="buyItem(400)">400
+                        積分</button></div>
             </div>
         </div>
     </div>
@@ -494,7 +1871,12 @@
             <p>請點擊下方按鈕模擬拍照並上傳。</p>
             <div id="photo-preview"></div>
             <button id="upload-photo-btn" class="action-btn">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="22" height="22"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z" /><path fill-rule="evenodd" d="M.458 8.447a1 1 0 011.08-1.08l2.964.593a1 1 0 01.922.922l.593 2.964a1 1 0 01-1.08 1.08l-2.964-.593a1 1 0 01-.922-.922L.458 8.447zM18 4.75A2.25 2.25 0 0015.75 2.5h-11.5A2.25 2.25 0 002 4.75v10.5A2.25 2.25 0 004.25 17.5h11.5A2.25 2.25 0 0018 15.25V4.75z" clip-rule="evenodd" /></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="22" height="22">
+                    <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                    <path fill-rule="evenodd"
+                        d="M.458 8.447a1 1 0 011.08-1.08l2.964.593a1 1 0 01.922.922l.593 2.964a1 1 0 01-1.08 1.08l-2.964-.593a1 1 0 01-.922-.922L.458 8.447zM18 4.75A2.25 2.25 0 0015.75 2.5h-11.5A2.25 2.25 0 002 4.75v10.5A2.25 2.25 0 004.25 17.5h11.5A2.25 2.25 0 0018 15.25V4.75z"
+                        clip-rule="evenodd" />
+                </svg>
                 <span>拍照上傳</span>
             </button>
         </div>
@@ -530,16 +1912,69 @@
     <div id="profile-modal" class="modal">
         <div class="modal-background glass-effect"></div>
         <div class="modal-content">
-            <button class="modal-close-btn" onclick="toggleModal('profile-modal')">X</button>
-            <h2>個人資料</h2>
-            <img id="profile-char-img" src="player_character.png" style="width: 100px; height: 100px; border-radius: 50%; margin-bottom: 15px;">
-            <h3 id="profile-player-name" style="margin: 0 0 10px;">玩家名稱</h3>
-            <p>積分: <span id="profile-points">0</span></p>
-            <p>已完成任務: <span id="profile-completed-tasks">0</span></p>
+            <!-- 頁首區域 -->
+            <div class="profile-header">
+                <button class="modal-close-btn" onclick="toggleModal('profile-modal')">X</button>
+                <div class="profile-avatar-container">
+                    <span class="profile-accessory">🎩</span>
+                    <img id="profile-char-img" src="player_character.png" class="profile-avatar">
+                </div>
+                <div class="profile-name" id="profile-player-name">地靈探索者</div>
+                <div class="profile-level">🌟 Lv.5 新手探索家</div>
+            </div>
+
+            <!-- 內容區域 -->
+            <div class="profile-body">
+                <!-- 統計數據 -->
+                <div class="profile-stats-row">
+                    <div class="profile-stat-item">
+                        <div class="profile-stat-value" id="profile-points">1,250</div>
+                        <div class="profile-stat-label">遊戲積分</div>
+                    </div>
+                    <div class="profile-stat-item">
+                        <div class="profile-stat-value" id="profile-completed-tasks">12</div>
+                        <div class="profile-stat-label">任務完成</div>
+                    </div>
+                    <div class="profile-stat-item">
+                        <div class="profile-stat-value">8</div>
+                        <div class="profile-stat-label">景點造訪</div>
+                    </div>
+                </div>
+
+                <!-- 成就徽章 -->
+                <div class="profile-section">
+                    <div class="profile-section-title">🏆 成就徽章</div>
+                    <div class="achievement-grid">
+                        <div class="achievement-badge unlocked" title="新手上路：完成第一個任務">🌟</div>
+                        <div class="achievement-badge unlocked" title="手作達人：完成手作文化路線">🎨</div>
+                        <div class="achievement-badge unlocked" title="節日優惠：在連假期間遊玩">🎊</div>
+                        <div class="achievement-badge locked" title="自然小專家：完成自然文化路線">🌿</div>
+                        <div class="achievement-badge locked" title="美食獵人：完成農食永續路線">🍜</div>
+                        <div class="achievement-badge locked" title="文化傳承者：完成原住民文化路線">🪧</div>
+                    </div>
+                </div>
+
+                <!-- 點點投餘額 -->
+                <div class="profile-section">
+                    <div class="profile-section-title">💳 南投點點投</div>
+                    <div class="nantou-points-card">
+                        <div class="points-info">
+                            <h4>可用點數</h4>
+                            <div class="points-value">12 點</div>
+                        </div>
+                        <div class="points-logo">🚿</div>
+                    </div>
+                </div>
+
+                <!-- 年度回顧入口 -->
+                <button class="profile-action-btn" onclick="window.location.href='annual_review.html'">
+                    📸 查看 2024 年度回顧
+                </button>
+            </div>
         </div>
     </div>
 
-    <!-- 全局通知 Modal  -->   
+    <!-- 全局通知 Modal  -->
     <div id="notification-modal" class="modal">
         <div class="modal-background glass-effect"></div>
         <div class="modal-content">
@@ -548,48 +1983,195 @@
             <button id="notification-close-btn" class="action-btn">好的</button>
         </div>
     </div>
-    <!-- ▼▼▼ 新增：登入與角色創建流程的 Modals ▼▼▼ -->
+    <!-- ▼▼▼ 會議展示功能 HTML ▼▼▼ -->
+    <!-- 儀表板入口按鈕 -->
+    <button id="dashboard-btn" title="營運儀表板" style="display: none;">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z" />
+        </svg>
+    </button>
+
+
+    <!-- 點數兌換視窗 -->
+    <div id="exchange-modal" class="modal">
+        <div class="modal-background glass-effect"></div>
+        <div class="modal-content">
+            <button class="modal-close-btn" onclick="toggleModal('exchange-modal')">X</button>
+            <h2>🎁 兌換南投點點投點數</h2>
+            <div id="exchange-form">
+                <p>將您的遊戲積分兌換為「南投點點投」點數，可在全縣特約商店消費折抵！</p>
+                <div class="exchange-info">
+                    <span>您目前的遊戲積分</span>
+                    <span class="points-value" id="exchange-current-points">0</span>
+                </div>
+                <div class="exchange-arrow">⬇️</div>
+                <div class="exchange-result">
+                    <span>可兌換為點點投點數</span>
+                    <span class="result-value" id="exchange-result-points">0</span>
+                    <p style="font-size: 12px; opacity: 0.8; margin: 5px 0 0;">(100 遊戲幣 = 1 點點投點數，1點=1元)</p>
+                </div>
+                <button id="confirm-exchange-btn" class="action-btn">確認兌換</button>
+            </div>
+            <div class="exchange-success" id="exchange-success">
+                <div class="checkmark">✅</div>
+                <h3>兌換成功！</h3>
+                <p>您的點數已存入南投點點投帳戶，可至全縣特約商店消費折抵。</p>
+                <button class="action-btn" onclick="toggleModal('exchange-modal')">完成</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 營運儀表板視窗 -->
+    <div id="dashboard-modal" class="modal">
+        <div class="modal-background glass-effect"></div>
+        <div class="modal-content">
+            <button class="modal-close-btn" onclick="toggleModal('dashboard-modal')">X</button>
+            <h2>📊 營運數據儀表板</h2>
+            <p style="opacity: 0.8; font-size: 14px;">即時監控平台運營狀況 (模擬數據)</p>
+            <div class="dashboard-grid">
+                <div class="stat-card">
+                    <span class="stat-value">127</span>
+                    <span class="stat-label">今日任務完成</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value">2,456</span>
+                    <span class="stat-label">累積訪客數</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value">$12.8K</span>
+                    <span class="stat-label">點數核銷額</span>
+                </div>
+            </div>
+            <div class="ranking-list">
+                <h4>🔥 熱門景點 TOP 5</h4>
+                <div class="ranking-item"><span class="rank">1</span><span class="name">廣興紙寮</span><span
+                        class="count">89 次</span></div>
+                <div class="ranking-item"><span class="rank">2</span><span class="name">埔里酒廠</span><span
+                        class="count">76 次</span></div>
+                <div class="ranking-item"><span class="rank">3</span><span class="name">暨南大學櫻花林</span><span
+                        class="count">65 次</span></div>
+                <div class="ranking-item"><span class="rank">4</span><span class="name">桃米生態村</span><span
+                        class="count">52 次</span></div>
+                <div class="ranking-item"><span class="rank">5</span><span class="name">中興新村</span><span
+                        class="count">43 次</span></div>
+            </div>
+        </div>
+    </div>
+    <!-- ▲▲▲ 會議展示功能 HTML 結束 ▲▲▲ -->
+
+    <!-- ▼▼▼ 登入與角色創建流程的 Modals ▼▼▼ -->
     <div id="login-modal" class="modal">
         <div class="modal-background glass-effect"></div>
         <div class="modal-content">
-            <h2>歡迎來到地靈 ONLINE</h2>
-            <p>為了記錄您的冒險旅程，請先登入</p>
-            <button id="google-login-btn">
-                <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="24" height="24" viewBox="0 0 48 48">
-                    <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"></path><path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"></path><path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"></path><path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.574l6.19,5.238C42.012,36.49,44,30.638,44,24C44,22.659,43.862,21.35,43.611,20.083z"></path>
-                </svg>
-                <span>使用 Google 帳號登入</span>
-            </button>
+            <!-- 頁首區域 -->
+            <div class="login-header">
+                <div class="welcome-emoji">🌿</div>
+                <h2>歡迎來到地靈 ONLINE</h2>
+                <p>探索南投秘境，解鎖獨特體驗</p>
+            </div>
+            <!-- 內容區域 -->
+            <div class="login-body">
+                <div class="login-features">
+                    <div class="login-feature">
+                        <div class="login-feature-icon">🗺️</div>
+                        <div class="login-feature-text">探索景點</div>
+                    </div>
+                    <div class="login-feature">
+                        <div class="login-feature-icon">🎯</div>
+                        <div class="login-feature-text">完成任務</div>
+                    </div>
+                    <div class="login-feature">
+                        <div class="login-feature-icon">🎁</div>
+                        <div class="login-feature-text">獲得獎勵</div>
+                    </div>
+                </div>
+                <button id="google-login-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 48 48">
+                        <path fill="#FFC107"
+                            d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z">
+                        </path>
+                        <path fill="#FF3D00"
+                            d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z">
+                        </path>
+                        <path fill="#4CAF50"
+                            d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z">
+                        </path>
+                        <path fill="#1976D2"
+                            d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.574l6.19,5.238C42.012,36.49,44,30.638,44,24C44,22.659,43.862,21.35,43.611,20.083z">
+                        </path>
+                    </svg>
+                    <span>使用 Google 帳號登入</span>
+                </button>
+            </div>
         </div>
     </div>
 
     <div id="create-account-modal" class="modal">
         <div class="modal-background glass-effect"></div>
         <div class="modal-content">
-            <h2>創建您的遊戲帳號</h2>
-            <p>請輸入您的玩家名稱，並選擇一位地靈夥伴！</p>
-            <input type="text" id="player-name-input" placeholder="輸入玩家名稱">
-            <div id="character-selection">
-                <div class="char-option selected" data-char="player_character.png">
-                    <img src="player_character.png" alt="角色1">
-                </div>
-                <div class="char-option" data-char="player_character_2.png">
-                    <img src="player_character_2.png" alt="角色2">
+            <!-- 頁首區域 -->
+            <div class="create-header">
+                <h2>創建您的地靈冒險者</h2>
+                <p>取個響亮的名字，選擇你的專屬地靈！</p>
+                <div class="create-steps">
+                    <div class="create-step active"></div>
+                    <div class="create-step"></div>
                 </div>
             </div>
-            <button id="confirm-creation-btn" class="action-btn">確認創建</button>
+            <!-- 內容區域 -->
+            <div class="create-body">
+                <div class="input-group">
+                    <label class="input-label">玩家名稱</label>
+                    <input type="text" id="player-name-input" placeholder="請輸入您的探索者名稱">
+                </div>
+                <div class="input-group">
+                    <label class="input-label">選擇地靈夥伴</label>
+                    <div id="character-selection">
+                        <div class="char-option selected" data-char="player_character.png">
+                            <img src="player_character.png" alt="小草靈">
+                            <span class="char-name">小草靈</span>
+                        </div>
+                        <div class="char-option" data-char="player_character_2.png">
+                            <img src="player_character_2.png" alt="酷地靈">
+                            <span class="char-name">酷地靈</span>
+                        </div>
+                    </div>
+                </div>
+                <button id="confirm-creation-btn" class="action-btn">🚀 開始冒險</button>
+            </div>
         </div>
     </div>
 
     <div id="location-permission-modal" class="modal">
         <div class="modal-background glass-effect"></div>
         <div class="modal-content">
-            <h2>需要您的位置權限</h2>
-            <p>「地靈ONLINE」需要存取您的位置，才能在地圖上顯示您與周遭的任務點。請點擊「允許」以開始遊戲。</p>
-            <button id="allow-location-btn" class="action-btn">允許存取位置</button>
+            <!-- 頁首區域 -->
+            <div class="permission-header">
+                <div class="permission-icon">📍</div>
+                <h2>需要您的位置權限</h2>
+            </div>
+            <!-- 內容區域 -->
+            <div class="permission-body">
+                <div class="permission-reasons">
+                    <div class="permission-reason">
+                        <span class="permission-reason-icon">🗺️</span>
+                        <span class="permission-reason-text">在地圖上顯示您的即時位置</span>
+                    </div>
+                    <div class="permission-reason">
+                        <span class="permission-reason-icon">🎯</span>
+                        <span class="permission-reason-text">偵測附近的任務景點並解鎖</span>
+                    </div>
+                    <div class="permission-reason">
+                        <span class="permission-reason-icon">🏆</span>
+                        <span class="permission-reason-text">抵達指定地點後完成任務獲取獎勵</span>
+                    </div>
+                </div>
+                <p class="permission-note">🔒 您的位置資料僅用於遊戲功能，不會與第三方分享</p>
+                <button id="allow-location-btn" class="action-btn">允許存取位置</button>
+            </div>
         </div>
     </div>
-    <!-- ▲▲▲ 新增結束 ▲▲▲ -->
+    <!-- ▲▲▲ 登入流程 Modals 結束 ▲▲▲ -->
     <script>
         // --- 全局變數 ---
         let locations = {};
@@ -619,7 +2201,7 @@
         });
 
         // --- 啟動與初始化邏輯 ---
-        window.onload = function() {
+        window.onload = function () {
             const splashScreen = document.getElementById('logo-splash');
             setTimeout(() => {
                 splashScreen.classList.add('hidden');
@@ -732,11 +2314,32 @@
                     map.panTo(playerMarker.getLatLng());
                 }
             });
+
+            // --- 會議展示功能初始化 ---
+            // 顯示儀表板按鈕
+            document.getElementById('dashboard-btn').style.display = 'flex';
+
+            // 預設勾選「手作文化路線」並載入標記
+            const handicraftCheckbox = document.getElementById('route-handicraft_culture');
+            handicraftCheckbox.checked = true;
+            toggleRoute('handicraft_culture');
+
+            // 綁定儀表板按鈕事件 - 導向完整後台頁面
+            document.getElementById('dashboard-btn').addEventListener('click', () => {
+                window.location.href = 'admin_dashboard.html';
+            });
+
+            // 綁定積分圓球點擊 -> 開啟兌換視窗
+            document.getElementById('points-display').addEventListener('click', openExchangeModal);
+
+            // 綁定兌換確認按鈕
+            document.getElementById('confirm-exchange-btn').addEventListener('click', confirmExchange);
         }
-        
+
         function initMap() {
-            const initialPosition = [23.965055100439997, 120.96731992393025];
-            map = L.map('map', { zoomControl: false, attributionControl: false }).setView(initialPosition, 15);
+            // 埔里/暨南大學附近作為試辦區中心點
+            const initialPosition = [23.9500, 120.9280];
+            map = L.map('map', { zoomControl: false, attributionControl: false }).setView(initialPosition, 14);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             }).addTo(map);
@@ -753,27 +2356,27 @@
                         playerMarker.setLatLng(newPos);
                         map.panTo(newPos);
                         activeRoutes.forEach(route => checkAndUnlockTasks(route));
-                    }, 
-                    () => console.log("無法取得GPS，地靈將停留在起始點。"), 
+                    },
+                    () => console.log("無法取得GPS，地靈將停留在起始點。"),
                     { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
                 );
             } else {
                 console.log("此瀏覽器不支援GPS定位。");
             }
         }
-        
+
         function showLocationDetails(location) {
             document.getElementById('location-title').innerText = location.name;
             document.getElementById('location-desc').innerText = location.desc;
             document.getElementById('location-image').src = location.imageUrl;
             document.getElementById('navigate-btn').href = `https://www.google.com/maps/dir/?api=1&destination=${location.lat},${location.lng}`;
-            
+
             const taskBtn = document.getElementById('accept-task-btn');
-            
+
             if (location.isCompleted) {
-                 document.getElementById('location-task').innerText = "您已完成此地的任務！";
-                 taskBtn.disabled = true;
-                 taskBtn.innerText = "任務已完成";
+                document.getElementById('location-task').innerText = "您已完成此地的任務！";
+                taskBtn.disabled = true;
+                taskBtn.innerText = "任務已完成";
             } else if (location.isPlayable) {
                 document.getElementById('location-task').innerText = location.task;
                 taskBtn.disabled = false;
@@ -811,7 +2414,7 @@
             toggleModal('location-modal');
             toggleModal('verification-modal');
         }
-        
+
         function submitVerification() {
             const location = playerState.currentVerifyingLocation;
             const userInput = document.getElementById('verification-input').value.trim().toUpperCase();
@@ -880,7 +2483,7 @@
             }
 
             if (!taskLocation || taskLocation.isCompleted) return;
-            taskLocation.isCompleted = true; 
+            taskLocation.isCompleted = true;
             if (markerObjects[location.id]) {
                 markerObjects[location.id].setIcon(completedIcon);
             }
@@ -894,7 +2497,7 @@
             }
             updateProgressBar();
             updatePointsDisplay();
-            toggleModal('progress-modal'); 
+            toggleModal('progress-modal');
             if (location.id === 'wushe') {
                 setTimeout(() => {
                     toggleModal('progress-modal');
@@ -1029,13 +2632,64 @@
                 showNotification("您的積分不足，無法兌換此商品。", "兌換失敗");
             }
         }
-        
+
         function showNotification(message, title = "提示") {
             document.getElementById('notification-title').innerText = title;
             document.getElementById('notification-message').innerText = message;
             document.getElementById('notification-close-btn').onclick = () => toggleModal('notification-modal');
             toggleModal('notification-modal');
         }
+
+        // --- ▼▼▼ 會議展示功能 JavaScript ▼▼▼ ---
+        function openExchangeModal() {
+            // 重置視窗狀態
+            document.getElementById('exchange-form').style.display = 'block';
+            document.getElementById('exchange-success').classList.remove('show');
+
+            // 更新當前積分顯示
+            const currentPoints = playerState.points;
+            document.getElementById('exchange-current-points').innerText = currentPoints;
+
+            // 計算可兌換的點點投點數 (100 遊戲幣 = 1 點)
+            const exchangeablePoints = Math.floor(currentPoints / 100);
+            document.getElementById('exchange-result-points').innerText = exchangeablePoints;
+
+            toggleModal('exchange-modal');
+        }
+
+        function confirmExchange() {
+            const currentPoints = playerState.points;
+            const exchangeablePoints = Math.floor(currentPoints / 100);
+
+            if (exchangeablePoints < 1) {
+                showNotification("您的積分不足 100，無法進行兌換。", "積分不足");
+                return;
+            }
+
+            // 扣除已兌換的積分
+            playerState.points = currentPoints % 100; // 保留餘數
+            updatePointsDisplay();
+
+            // 顯示成功動畫
+            document.getElementById('exchange-form').style.display = 'none';
+            document.getElementById('exchange-success').classList.add('show');
+        }
+        // --- ▲▲▲ 會議展示功能 JavaScript 結束 ▲▲▲ ---
+    </script>
+    <script>
+        // PWA Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./service-worker.js')
+                    .then(registration => {
+                        console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                    })
+                    .catch(err => {
+                        console.log('ServiceWorker registration failed: ', err);
+                    });
+            });
+        }
     </script>
 </body>
+
 </html>

@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>GSOUL 2024 年度回顧</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap');
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #000;
+            color: white;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        /* 故事容器 */
+        .story-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        /* 進度條 */
+        .progress-bar {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            gap: 5px;
+            z-index: 1000;
+        }
+
+        .progress-segment {
+            flex: 1;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .progress-segment.active .progress-fill {
+            width: 100%;
+            animation: progressFill 5s linear forwards;
+        }
+
+        .progress-segment.completed .progress-fill {
+            width: 100%;
+        }
+
+        .progress-fill {
+            width: 0;
+            height: 100%;
+            background: white;
+            border-radius: 2px;
+        }
+
+        @keyframes progressFill {
+            from {
+                width: 0;
+            }
+
+            to {
+                width: 100%;
+            }
+        }
+
+        /* 故事卡片基礎樣式 */
+        .story-card {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 60px 40px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+
+        .story-card.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* 背景動畫漸層 */
+        .bg-gradient-1 {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .bg-gradient-2 {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .bg-gradient-3 {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .bg-gradient-4 {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+
+        .bg-gradient-5 {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        }
+
+        .bg-gradient-6 {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            color: #333;
+        }
+
+        /* 背景動態效果 */
+        .animated-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        .floating-shape {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.15;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0) rotate(0deg);
+            }
+
+            50% {
+                transform: translateY(-30px) rotate(180deg);
+            }
+        }
+
+        /* 大型年份數字背景 */
+        .year-bg {
+            position: absolute;
+            font-size: 35vw;
+            font-weight: 900;
+            opacity: 0.08;
+            z-index: 0;
+            line-height: 1;
+        }
+
+        /* 內容樣式 */
+        .card-content {
+            position: relative;
+            z-index: 1;
+            max-width: 500px;
+        }
+
+        .emoji-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            animation: bounceIn 0.6s ease-out;
+        }
+
+        @keyframes bounceIn {
+            0% {
+                transform: scale(0);
+            }
+
+            50% {
+                transform: scale(1.2);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 400;
+            opacity: 0.9;
+            margin-bottom: 15px;
+            animation: fadeInUp 0.6s ease-out 0.2s both;
+        }
+
+        .big-number {
+            font-size: clamp(60px, 20vw, 120px);
+            font-weight: 900;
+            line-height: 1;
+            margin: 20px 0;
+            animation: countUp 0.8s ease-out 0.4s both;
+        }
+
+        @keyframes countUp {
+            0% {
+                transform: scale(0.5);
+                opacity: 0;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .card-subtitle {
+            font-size: 24px;
+            font-weight: 700;
+            margin: 10px 0;
+            animation: fadeInUp 0.6s ease-out 0.6s both;
+        }
+
+        .card-desc {
+            font-size: 16px;
+            opacity: 0.85;
+            line-height: 1.6;
+            animation: fadeInUp 0.6s ease-out 0.8s both;
+        }
+
+        @keyframes fadeInUp {
+            0% {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+
+            100% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* 景點卡片特殊樣式 */
+        .location-spotlight {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 60px;
+            margin-bottom: 25px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
+            }
+
+            50% {
+                transform: scale(1.05);
+                box-shadow: 0 0 0 20px rgba(255, 255, 255, 0);
+            }
+        }
+
+        /* 成就列表 */
+        .achievement-list {
+            display: flex;
+            gap: 15px;
+            margin: 25px 0;
+            animation: fadeInUp 0.6s ease-out 0.6s both;
+        }
+
+        .achievement-item {
+            width: 70px;
+            height: 70px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            animation: popIn 0.4s ease-out both;
+        }
+
+        .achievement-item:nth-child(1) {
+            animation-delay: 0.8s;
+        }
+
+        .achievement-item:nth-child(2) {
+            animation-delay: 1s;
+        }
+
+        .achievement-item:nth-child(3) {
+            animation-delay: 1.2s;
+        }
+
+        @keyframes popIn {
+            0% {
+                transform: scale(0) rotate(-20deg);
+            }
+
+            100% {
+                transform: scale(1) rotate(0deg);
+            }
+        }
+
+        /* 底部導航 */
+        .nav-hint {
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 14px;
+            opacity: 0.6;
+            z-index: 1000;
+        }
+
+        /* 分享按鈕 */
+        .share-btn {
+            display: inline-block;
+            background: white;
+            color: #333;
+            padding: 15px 40px;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: bold;
+            text-decoration: none;
+            margin-top: 25px;
+            animation: fadeInUp 0.6s ease-out 1s both;
+            transition: transform 0.2s;
+        }
+
+        .share-btn:hover {
+            transform: scale(1.05);
+        }
+
+        /* 關閉按鈕 */
+        .close-btn {
+            position: fixed;
+            top: 50px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            z-index: 1001;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* 數據條形圖 */
+        .stat-bars {
+            width: 100%;
+            max-width: 300px;
+            margin: 20px 0;
+            animation: fadeInUp 0.6s ease-out 0.6s both;
+        }
+
+        .stat-bar-item {
+            display: flex;
+            align-items: center;
+            margin: 12px 0;
+        }
+
+        .stat-bar-label {
+            width: 80px;
+            font-size: 12px;
+            text-align: right;
+            margin-right: 10px;
+        }
+
+        .stat-bar-track {
+            flex: 1;
+            height: 24px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .stat-bar-fill {
+            height: 100%;
+            background: white;
+            border-radius: 12px;
+            animation: barGrow 1s ease-out both;
+        }
+
+        @keyframes barGrow {
+            from {
+                width: 0;
+            }
+        }
+
+        .stat-bar-item:nth-child(1) .stat-bar-fill {
+            animation-delay: 0.8s;
+        }
+
+        .stat-bar-item:nth-child(2) .stat-bar-fill {
+            animation-delay: 1s;
+        }
+
+        .stat-bar-item:nth-child(3) .stat-bar-fill {
+            animation-delay: 1.2s;
+        }
+
+        .stat-bar-item:nth-child(4) .stat-bar-fill {
+            animation-delay: 1.4s;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="story-container" onclick="nextStory()">
+        <!-- 進度條 -->
+        <div class="progress-bar">
+            <div class="progress-segment active">
+                <div class="progress-fill"></div>
+            </div>
+            <div class="progress-segment">
+                <div class="progress-fill"></div>
+            </div>
+            <div class="progress-segment">
+                <div class="progress-fill"></div>
+            </div>
+            <div class="progress-segment">
+                <div class="progress-fill"></div>
+            </div>
+            <div class="progress-segment">
+                <div class="progress-fill"></div>
+            </div>
+            <div class="progress-segment">
+                <div class="progress-fill"></div>
+            </div>
+        </div>
+
+        <!-- 關閉按鈕 -->
+        <button class="close-btn" onclick="window.location.href='index.html'">✕</button>
+
+        <!-- 卡片 1: 開場 -->
+        <div class="story-card bg-gradient-1 active" id="card-0">
+            <div class="year-bg">2024</div>
+            <div class="animated-bg">
+                <div class="floating-shape"
+                    style="width: 200px; height: 200px; background: white; top: 10%; left: -50px;"></div>
+                <div class="floating-shape"
+                    style="width: 150px; height: 150px; background: white; bottom: 20%; right: -30px; animation-delay: 2s;">
+                </div>
+            </div>
+            <div class="card-content">
+                <div class="emoji-icon">🎉</div>
+                <p class="card-title">你的 2024 GSOUL 旅程</p>
+                <div class="big-number">回顧</div>
+                <p class="card-desc">這一年，你在南投留下了滿滿的足跡<br>讓我們一起回顧這段精彩旅程！</p>
+            </div>
+        </div>
+
+        <!-- 卡片 2: 總造訪數 -->
+        <div class="story-card bg-gradient-2" id="card-1">
+            <div class="animated-bg">
+                <div class="floating-shape"
+                    style="width: 180px; height: 180px; background: white; top: 5%; right: 10%;"></div>
+                <div class="floating-shape"
+                    style="width: 120px; height: 120px; background: white; bottom: 15%; left: 5%; animation-delay: 1.5s;">
+                </div>
+            </div>
+            <div class="card-content">
+                <p class="card-title">🗺️ 你的探索足跡</p>
+                <div class="big-number">8</div>
+                <p class="card-subtitle">個景點</p>
+                <p class="card-desc">你踏遍了南投的山水秘境<br>比 70% 的玩家都還要多！</p>
+            </div>
+        </div>
+
+        <!-- 卡片 3: 最愛景點 -->
+        <div class="story-card bg-gradient-3" id="card-2">
+            <div class="animated-bg">
+                <div class="floating-shape"
+                    style="width: 160px; height: 160px; background: white; top: 20%; left: -40px;"></div>
+            </div>
+            <div class="card-content">
+                <p class="card-title">⭐ 你最愛的景點</p>
+                <div class="location-spotlight">🎨</div>
+                <div class="card-subtitle">廣興紙寮</div>
+                <p class="card-desc">你在這裡完成了手作體驗任務<br>還拍下了超美的照片！</p>
+            </div>
+        </div>
+
+        <!-- 卡片 4: 任務完成 -->
+        <div class="story-card bg-gradient-4" id="card-3">
+            <div class="card-content">
+                <p class="card-title">✅ 任務達成</p>
+                <div class="big-number">12</div>
+                <p class="card-subtitle">個任務完成</p>
+                <div class="stat-bars">
+                    <div class="stat-bar-item">
+                        <span class="stat-bar-label">手作文化</span>
+                        <div class="stat-bar-track">
+                            <div class="stat-bar-fill" style="width: 100%;"></div>
+                        </div>
+                    </div>
+                    <div class="stat-bar-item">
+                        <span class="stat-bar-label">自然文化</span>
+                        <div class="stat-bar-track">
+                            <div class="stat-bar-fill" style="width: 75%;"></div>
+                        </div>
+                    </div>
+                    <div class="stat-bar-item">
+                        <span class="stat-bar-label">農食永續</span>
+                        <div class="stat-bar-track">
+                            <div class="stat-bar-fill" style="width: 50%;"></div>
+                        </div>
+                    </div>
+                    <div class="stat-bar-item">
+                        <span class="stat-bar-label">原住民</span>
+                        <div class="stat-bar-track">
+                            <div class="stat-bar-fill" style="width: 25%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 卡片 5: 獲得成就 -->
+        <div class="story-card bg-gradient-5" id="card-4">
+            <div class="card-content">
+                <p class="card-title">🏆 解鎖成就</p>
+                <div class="big-number">3</div>
+                <p class="card-subtitle">個成就徽章</p>
+                <div class="achievement-list">
+                    <div class="achievement-item">🌟</div>
+                    <div class="achievement-item">🎨</div>
+                    <div class="achievement-item">🎊</div>
+                </div>
+                <p class="card-desc">你是「新手上路」、「手作達人」<br>還有「節日探險家」！</p>
+            </div>
+        </div>
+
+        <!-- 卡片 6: 總結與分享 -->
+        <div class="story-card bg-gradient-6" id="card-5">
+            <div class="card-content">
+                <div class="emoji-icon">🚀</div>
+                <p class="card-title">2024 你做到了！</p>
+                <div class="card-subtitle" style="font-size: 28px;">地靈探索者</div>
+                <p class="card-desc" style="margin: 20px 0;">
+                    累積 <strong>1,250</strong> 積分<br>
+                    兌換 <strong>12</strong> 點南投點點投<br>
+                    探索了南投的美好！
+                </p>
+                <a href="index.html" class="share-btn">📲 分享我的回顧</a>
+            </div>
+        </div>
+
+        <div class="nav-hint">點擊任意處繼續 →</div>
+    </div>
+
+    <script>
+        let currentCard = 0;
+        const totalCards = 6;
+        let autoAdvanceTimer;
+
+        function showCard(index) {
+            // 更新卡片顯示
+            document.querySelectorAll('.story-card').forEach((card, i) => {
+                card.classList.toggle('active', i === index);
+            });
+
+            // 更新進度條
+            document.querySelectorAll('.progress-segment').forEach((seg, i) => {
+                seg.classList.remove('active', 'completed');
+                if (i < index) {
+                    seg.classList.add('completed');
+                } else if (i === index) {
+                    seg.classList.add('active');
+                }
+            });
+
+            // 重設自動前進計時器
+            clearTimeout(autoAdvanceTimer);
+            if (index < totalCards - 1) {
+                autoAdvanceTimer = setTimeout(() => nextStory(), 5000);
+            }
+        }
+
+        function nextStory() {
+            if (currentCard < totalCards - 1) {
+                currentCard++;
+                showCard(currentCard);
+            }
+        }
+
+        function prevStory() {
+            if (currentCard > 0) {
+                currentCard--;
+                showCard(currentCard);
+            }
+        }
+
+        // 鍵盤支援
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                nextStory();
+            } else if (e.key === 'ArrowLeft') {
+                prevStory();
+            } else if (e.key === 'Escape') {
+                window.location.href = 'index.html';
+            }
+        });
+
+        // 觸控左右滑動
+        let touchStartX = 0;
+        document.addEventListener('touchstart', (e) => {
+            touchStartX = e.touches[0].clientX;
+        });
+        document.addEventListener('touchend', (e) => {
+            const touchEndX = e.changedTouches[0].clientX;
+            const diff = touchStartX - touchEndX;
+            if (Math.abs(diff) > 50) {
+                if (diff > 0) nextStory();
+                else prevStory();
+            }
+        });
+
+        // 啟動自動播放
+        autoAdvanceTimer = setTimeout(() => nextStory(), 5000);
+    </script>
+</body>
+
+</html>

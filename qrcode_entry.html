@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GSOUL 地靈傳說 - 掃碼體驗</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 30px;
+            padding: 40px;
+            text-align: center;
+            max-width: 400px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .logo {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 20px;
+        }
+
+        .logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 16px;
+            margin-bottom: 30px;
+        }
+
+        .qr-container {
+            background: white;
+            padding: 20px;
+            border-radius: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .qr-container img {
+            width: 200px;
+            height: 200px;
+        }
+
+        .instruction {
+            color: #667eea;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .description {
+            color: #888;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+
+        .pilot-info {
+            background: linear-gradient(135deg, #4CAF50, #2E7D32);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 15px;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .direct-link {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            text-decoration: none;
+            padding: 15px 30px;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 16px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .direct-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .footer {
+            margin-top: 25px;
+            color: #aaa;
+            font-size: 12px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="logo">
+            <img src="GSoulLogo.png" alt="GSOUL Logo">
+        </div>
+        <h1>GSOUL 地靈傳說</h1>
+        <p class="subtitle">南投縣互動式觀光體驗遊戲</p>
+
+        <div class="qr-container">
+            <img id="qr-code" src="" alt="QR Code">
+        </div>
+
+        <p class="instruction">📱 掃描上方 QR Code 開始體驗</p>
+
+        <div class="pilot-info">
+            📍 試辦區域：埔里-暨南大學周邊
+        </div>
+
+        <p class="description">
+            完成景點任務獲得積分，可兌換為「南投點點投」點數，<br>
+            在全縣特約商店消費折抵！
+        </p>
+
+        <a href="index.html" class="direct-link">直接開始遊戲 →</a>
+
+        <p class="footer">© 2025 綠色皮卡丘團隊 | 南投縣山城數位黑客松</p>
+    </div>
+
+    <script>
+        // 動態生成當前頁面的 QR Code
+        window.onload = function () {
+            const currentUrl = window.location.href.replace('qrcode_entry.html', 'index.html');
+            const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(currentUrl)}`;
+            document.getElementById('qr-code').src = qrApiUrl;
+        };
+    </script>
+</body>
+
+</html>
